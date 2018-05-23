@@ -1,2 +1,13 @@
 ---
-# tpm2::parameter_name: 'value'
+tpm2::tabrm_service: tpm2-abrmd
+tpm2::package_names:
+  - simp-tpm2-tools
+  - simp-tpm2-tss
+  - simp-tpm2-abrmd
+  - simp-tpm2-abrmd-selinux
+
+# Unused
+tpm2::package_names::official:
+  - tpm2-tools
+  - tpm2-tss
+  - tpm2-abrmd

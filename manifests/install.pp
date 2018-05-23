@@ -5,7 +5,7 @@
 class tpm2::install {
   assert_private()
 
-  package { $::tpm2::package_name:
-    ensure => present
+  package { $::tpm2::package_names:
+    ensure => $::tpm2::package_ensure,
   }
 }
