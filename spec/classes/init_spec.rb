@@ -46,7 +46,6 @@ describe 'tpm2' do
         end
 
         context 'with default params' do
-
           if os_facts[:os][:release][:major].to_i < 7
             context 'on os version < 7 ' do
               it { is_expected.to_not compile}
