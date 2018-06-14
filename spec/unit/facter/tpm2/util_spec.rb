@@ -67,6 +67,10 @@ describe Facter::TPM2::Util do
           "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
         )
       end
+
+
+      # Test against `tpm2_getcap -c properties-fixed` dumps from as many
+      # manufacturers/models as we can find
       it 'should return a correct data structure queried from the TPM of any manufacturer' do
         yaml_files = Dir.glob( File.expand_path( '../../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/*.yaml', __FILE__) )
         yaml_strings = yaml_files.map{ |yaml_file| File.read yaml_file }
@@ -85,35 +89,36 @@ describe Facter::TPM2::Util do
   end
 
 
-###  describe '#validate_ekc_cert' do
-###    context "when tpm2-tools are installed" do
-###      before :each do
-###
-###      end
-###
-###      context 'when tpm2-tools cannot query the TABRM' do
-###        it 'should return nil' do
-###          allow(Facter::Core::Execution).to receive(:execute).with( "#{@l_bin}/tpm2_pcrlist -s").and_return( nil )
-###          util = Facter::TPM2::Util.new
-###          expect( util.build_structured_fact ).to be nil
-###        end
-###      end
-###      context 'when tpm2-tools can query the TABRM' do
-###        before :each do
-###          allow(Facter::Core::Execution).to receive(:execute).with("#{@l_bin}/tpm2_pcrlist -s").and_return(
-###            "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
-###          )
-###          allow(Facter::Core::Execution).to receive(:execute).with("#{@l_bin}/tpm2_getcap -c properties-fixed").and_return(
-###            File.read File.expand_path( '../../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt6xx-fbfc85e.yaml', __FILE__)
-###          )
-###        end
-###        it 'should populate result' do
-###          util = Facter::TPM2::Util.new
-###          expect( util.build_structured_fact.is_a? Hash ).to be true
-###        end
-###      end
-###      context 'when tpm2-tools can query the TABRM' do
-###      end
-###    end
-###  end
+  describe '#validate_ekc_cert' do
+    context "when tpm2-tools are installed" do
+      before :each do
+
+      end
+
+      context 'when tpm2-tools cannot query the TABRM' do
+        it 'should return nil' do
+          allow(Facter::Core::Execution).to receive(:execute).with( "#{@l_bin}/tpm2_pcrlist -s").and_return( nil )
+          util = Facter::TPM2::Util.new
+          expect( util.build_structured_fact ).to be nil
+        end
+      end
+
+      xcontext 'when tpm2-tools can query the TABRM', :skip => 'FIXME: acquire TPM2 EK certificate + pubkey sample files to test' do
+        before :each do
+          allow(Facter::Core::Execution).to receive(:execute).with("#{@l_bin}/tpm2_pcrlist -s").and_return(
+            "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
+          )
+          allow(Facter::Core::Execution).to receive(:execute).with("#{@l_bin}/tpm2_getcap -c properties-fixed").and_return(
+            File.read File.expand_path( '../../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt6xx-fbfc85e.yaml', __FILE__)
+          )
+        end
+        it 'should populate result' do
+          util = Facter::TPM2::Util.new
+          expect( util.build_structured_fact.is_a? Hash ).to be true
+        end
+      end
+      context 'when tpm2-tools can query the TABRM' do
+      end
+    end
+  end
 end
