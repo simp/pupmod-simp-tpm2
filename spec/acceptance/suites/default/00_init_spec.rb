@@ -1,25 +1,53 @@
 require 'spec_helper_acceptance'
+require 'yaml'
 
-test_name 'tpm::tpm2::install class'
-install_tpm2_0_tools
+RUN_IN_PARALLEL = ENV.fetch('BEAKER_RUN_IN_PARALLEL', '')
+                     .split(',').include?('tests')
 
-describe 'tpm::tpm2::install class' do
+test_name 'tpm2 class'
 
-  let(:manifest) { <<-EOS
-      include 'tpm::tpm2::install'
-    EOS
-  }
+describe 'tpm2 class' do
+  let(:manifest) do
+    <<-MANIFEST
+      include 'tpm2'
+    MANIFEST
+  end
 
   context 'with default settings' do
     it 'should apply with no errors' do
-require 'pry'; binding.pry
-      apply_manifest_on(hosts, manifest, run_in_parallel: true)
-      apply_manifest_on(hosts, manifest, catch_failures: true, run_in_parallel: true)
+      #      on( hosts, 'yum install -y tmux htop vim-enhanced net-tools ' + \
+      #        'setools-console setroubleshoot checkpolicy ' + \
+      #        'policycoreutils-devel mlocate man-pages')
+      #      on( hosts, 'updatedb')
+      apply_manifest_on(hosts, manifest, run_in_parallel: RUN_IN_PARALLEL)
+      apply_manifest_on(
+        hosts, manifest,
+        catch_failures: true,
+        run_in_parallel: RUN_IN_PARALLEL
+      )
     end
 
     it 'should be idempotent' do
       sleep 20
-      apply_manifest_on(hosts, manifest, catch_changes: true, run_in_parallel: true)
+      apply_manifest_on(
+        hosts, manifest,
+        catch_changes: true,
+        run_in_parallel: RUN_IN_PARALLEL
+      )
+    end
+
+    it 'should be running the tpm2-abrmd service'
+       hosts.each do |host|
+         on(host, 'puppet resource service tpm2-abrmd --to_yaml').each do |s|
+         s.each do |result|
+           service = YAML.load(result)['service']['tpm2-abrmd']
+           expect{ service['ensure'].to eq 'running' }
+         end
+       end
+     end
+
+    it 'should run pry' do
+      require 'pry'; binding.pry
     end
   end
 end
