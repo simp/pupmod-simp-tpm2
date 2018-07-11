@@ -1,43 +1,36 @@
-**FIXME**: Ensure the badges are correct and complete, then remove this message!
-
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-tpm2.svg)](https://travis-ci.org/simp/pupmod-simp-tpm2) [![SIMP compatibility](https://img.shields.io/badge/SIMP%20compatibility-6.*-orange.svg)](https://img.shields.io/badge/SIMP%20compatibility-6.*-orange.svg)
 
 #### Table of Contents
 
-1. [Description](#description)
-2. [Setup - The basics of getting started with tpm2](#setup)
-    * [What tpm2 affects](#what-tpm2-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with tpm2](#beginning-with-tpm2)
-3. [Usage - Configuration options and additional functionality](#usage)
-4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
-    * [Acceptance Tests - Beaker env variables](#acceptance-tests)
+<!-- vim-markdown-toc GFM -->
 
+* [Description](#description)
+  * [This is a SIMP module](#this-is-a-simp-module)
+* [Setup](#setup)
+  * [What tpm2 affects](#what-tpm2-affects)
+  * [Setup Requirements **OPTIONAL**](#setup-requirements-optional)
+  * [Beginning with tpm2](#beginning-with-tpm2)
+* [Usage](#usage)
+* [Reference](#reference)
+* [Limitations](#limitations)
+* [Development](#development)
+  * [Acceptance tests](#acceptance-tests)
+    * [TPM2 simulator](#tpm2-simulator)
+    * [Environment variables](#environment-variables)
+
+<!-- vim-markdown-toc -->
 ## Description
 
-**FIXME:** Ensure the *Description* section is correct and complete, then remove this message!
-
-Start with a one- or two-sentence summary of what the module does and/or what
-problem it solves. This is your 30-second elevator pitch for your module.
-Consider including OS and Puppet version compatability, and any other
-information users will need to quickly assess the module's viability within
-their environment.
-
-You can give more descriptive information in a second paragraph. This paragraph
-should answer the questions: "What does this module *do*?" and "Why would I use
-it?" If your module has a range of functionality (installation, configuration,
-management, etc.), this is the time to mention it.
+This module manages TPM 2.0 devices and the `tpm2-tools` software.
 
 ### This is a SIMP module
 
-This module is a component of the [System Integrity Management
-Platform](https://github.com/NationalSecurityAgency/SIMP), a
-compliance-management framework built on Puppet.
+This module is a component of the [System Integrity Management Platform][simp],
+a compliance-management framework built on Puppet.
 
 If you find any issues, they may be submitted to our [bug
-tracker](https://simp-project.atlassian.net/).
+tracker][simp-bug-tracker].
+
 
 **FIXME:** Ensure the *This is a SIMP module* section is correct and complete, then remove this message!
 
@@ -55,6 +48,14 @@ it can be used independently:
 ## Setup
 
 ### What tpm2 affects
+
+The **tpm2** module manages:
+
+* [`tpm2-software`][tpm2-software] packages and services (e.g., [`tpm2-tools`][tpm2-tools], etc.,)
+* Ownership of a TPM2 device's endorsement hierarchy
+* The `tpm2` Facter fact
+
+----
 
 **FIXME:** Ensure the *What tpm2 affects* section is correct and complete, then remove this message!
 
@@ -133,7 +134,28 @@ bundle install
 bundle exec rake beaker:suites
 ```
 
+
+#### TPM2 simulator
+
+The acceptance tests spin up a tpm2-simulator.  To our knowledge this has not
+been packaged for EL7, so a package has been provided as part of
+
+
+
+#### Environment variables
+
+
+* `BEAKER_download_pre_suite_rpms` When '`yes`', downloads a tarball of RPMs to install before running the first Beaker suite
+
+* `BEAKER_tpm2_rpms_tarball_url`
+
 **FIXME:** Ensure the *Acceptance tests* section is correct and complete, including any module-specific instructions, and remove this message!
 
 Please refer to the [SIMP Beaker Helpers documentation](https://github.com/simp/rubygem-simp-beaker-helpers/blob/master/README.md)
 for more information.
+
+[simp]: https://github.com/NationalSecurityAgency/SIMP
+[simp-bug-tracker]: https://simp-project.atlassian.net/
+[tpm2-tools]: https://github.com/tpm2-software/tpm2-toolso
+[tpm2-software]: https://github.com/tpm2-software/
+
