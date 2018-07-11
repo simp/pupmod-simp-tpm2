@@ -4,19 +4,18 @@
 # configured to comminucate with the TPM
 Facter.add('tpm2') do
 
-  #### NOTE: The confine below is intentionally commented out (see comments).
-  ####
-  #### It has been left here to explain why we're not using it, or t
-  ####
-  #### Background:
+  #### NOTE: The confine below is intentionally commented out to explain why
+  ####       we're not using it (or something like it), as we did with the `tpm`
+  ####       fact.
   ####
   #### The `:has_tpm` detection strategy used for TPM 1 is unreliable for TPM
   #### 2.0.  TCTI can be configured to talk over different transports (including
   #### network sockets), so the TPM device the system is using may not be in a
   #### local `/dev/tmp#` device.
   ####
-  #### This makes it impossible to conclusively detect whether a system has TPM2.0
-  #### capabilities until the tpm2-tools suite is installed and configured.
+  #### This makes it impossible to conclusively detect whether a system has
+  #### TPM2.0 capabilities until the tpm2-tools suite is installed and
+  #### configured.
   ####
   #### See comments/discussion at:
   ####
@@ -39,12 +38,14 @@ Facter.add('tpm2') do
 
   # Confine the TPM2 fact to systems that are known NOT to have a TPM 1 device.
   #
-  # It only makes sense to test for TPM2 info if either:
+  # This block is an optimization:
+  #
+  # It only makes sense to try to collect TPM2 info if either:
   # - If a local TPM device has *not* been detected (TCTI may use network)
   # - If a local TPM device has been detected, but is *not* TPM 1.2
   #
-  # NOTE: This confine block must remain anonymous--a direct confine on
-  # `:tpm_version` will always short-circuit if the fact is absent. (Facter
+  # NOTE: This `confine` block *must* be anonymous--a direct confine on
+  # `:tpm_version` will always short-circuit if that fact is absent. (Facter
   # doesn't execute confine blocks for absent facts.)
   confine do
      value = Facter[:tpm_version]

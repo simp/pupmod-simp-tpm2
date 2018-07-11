@@ -21,7 +21,7 @@ describe 'tpm2' do
         it { is_expected.to create_service('tpm2-abrmd') }
       end
 
-      xcontext 'with default parameters and no physical TPM', :skip => xmessage do
+      context 'with default parameters and no physical TPM', :skip => xmessage do
         let(:facts) do
           os_facts.merge({
           })
@@ -31,7 +31,7 @@ describe 'tpm2' do
       end
 
 
-      xcontext 'with detected TPM unable to determine TPM type', :skip => xmessage do
+      context 'with detected TPM unable to determine TPM type', :skip => xmessage do
         let(:facts) do
           os_facts.merge({
           })
@@ -57,15 +57,14 @@ describe 'tpm2' do
               it { is_expected.not_to create_class('tpm2::ima') }
               it { is_expected.not_to create_class('tpm2::ownership') }
               it { is_expected.to create_class('tpm2::install') }
-              it { is_expected.to contain_package('simp-tpm2-tools').with_ensure('installed') }
-              it { is_expected.to contain_package('simp-tpm2-tss').with_ensure('installed') }
-              it { is_expected.to contain_package('simp-tpm2-abrmd').with_ensure('installed') }
-              it { is_expected.to contain_package('simp-tpm2-abrmd-selinux').with_ensure('installed') }
+              it { is_expected.to contain_package('tpm2-tools').with_ensure('installed') }
+              it { is_expected.to contain_package('tpm2-tss').with_ensure('installed') }
+              it { is_expected.to contain_package('tpm2-abrmd').with_ensure('installed') }
             end
           end
         end
 
-        xcontext 'with take_ownership true', skip: xmessage do
+        context 'with take_ownership true', skip: xmessage do
           let(:params) {{ :take_ownership => true }}
 
           if os_facts[:os][:release][:major].to_i < 7
@@ -79,10 +78,9 @@ describe 'tpm2' do
               it { is_expected.not_to create_class('tpm2::ima') }
               it { is_expected.to create_class('tpm2::tpm2::ownership') }
               it { is_expected.to create_class('tpm2::tpm2::install') }
-              it { is_expected.to contain_package('simp-tpm2-tools').with_ensure('installed') }
-              it { is_expected.to contain_package('simp-tpm2-tss').with_ensure('installed') }
-              it { is_expected.to contain_package('simp-tpm2-abrmd').with_ensure('installed') }
-              it { is_expected.to contain_package('simp-tpm2-abrmd-selinux').with_ensure('installed') }
+              it { is_expected.to contain_package('tpm2-tools').with_ensure('installed') }
+              it { is_expected.to contain_package('tpm2-tss').with_ensure('installed') }
+              it { is_expected.to contain_package('tpm2-abrmd').with_ensure('installed') }
             end
           end
         # take_ownership true

@@ -31,15 +31,15 @@ class Facter::TPM2::Util
     Facter::Core::Execution.execute(File.join(@prefix, cmd))
   end
 
-  # Translate the TPM_PT_MANUFACTURER number into the TCG-registered ID strings
+  # Translate a TPM_PT_MANUFACTURER number into the TCG-registered ID strings
   #   (registry at: https://trustedcomputinggroup.org/vendor-id-registry/)
   #
-  # @parame [Numeric] number to decode
+  # @param  [Numeric] number to decode (from `TPM_PT_MANUFACTURER`)
   # @return [String] the decoded String
   def decode_uint32_string(num)
     # rubocop:disable Style/FormatStringToken
-    # NOTE: only strip "\x00" from the end of strings; some registered
-    # identifiers include trailing spaces (e.g., 'NSM ')!
+    # NOTE: Only strip "\x00" from the end of strings; some registered
+    #       identifiers include trailing spaces (e.g., 'NSM ')!
     ('%x' % num).scan(/.{2}/).map { |x| x.hex.chr }.join.gsub(/\x00*$/,'')
     # rubocop:enable Style/FormatStringToken
   end
@@ -62,10 +62,15 @@ class Facter::TPM2::Util
     ]
   end
 
-
-  # The TPM is only required to provide the following properties when in
-  # failure mode:
+  # Decode properties that the TPM is required to provide, even in failure mode
   #
+  # The property keys and values are made as human-readable as possible.
+  # The firmware manufacturer string and version numbers are decoded into UTF-8
+  # according to the TPM 2.0 specs and observed implementations.
+  #
+  # @param [Hash] properties, as collected by `tpm2_getcap -c properties-fixed`
+  #
+  # @return [Hash] Decoded
   def failure_safe_properties(tpm2_properties)
     {
       'manufacturer'     => decode_uint32_string(
@@ -82,10 +87,10 @@ class Facter::TPM2::Util
 
   # Returns a structured fact describing the TPM 2.0 data
   # @return [nil] if TPM data cannot be retrieved.
-  # @return [
+  # @return [Hash] TPM2 properties
   def build_structured_fact
 
-    # fail fast
+    # fail fast:
     unless @prefix                 # must have tpm2-tools installed
       Facter.debug 'path to tpm2-tools not found'
       return nil

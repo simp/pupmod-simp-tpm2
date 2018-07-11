@@ -1,24 +1,10 @@
 ---
 tpm2::tabrm_service: tpm2-abrmd
 
-tpm2::simp_packages:
-  simp-tpm2-tools:
-    ensure: package_ensure
-  simp-tpm2-tss:
-    ensure: package_ensure
-  simp-tpm2-abrmd:
-    ensure: package_ensure
-  simp-tpm2-abrmd-selinux:
-    ensure: package_ensure
-
-tpm2::vendor_packages:
+tpm2::packages:
   tpm2-tools:
     ensure: package_ensure
   tpm2-tss:
     ensure: package_ensure
   tpm2-abrmd:
     ensure: package_ensure
-  simp-tpm2-abrmd-selinux:
-    ensure: package_ensure
-
-tpm2::packages: "%{alias('tpm2::simp_packages')}"
