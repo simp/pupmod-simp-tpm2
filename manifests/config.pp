@@ -1,7 +1,4 @@
-# == Class tpm2::config
-#
-# This class is called from tpm2 for service config.
-#
+# A private class called from tpm2 to configure services.
 class tpm2::config {
   assert_private()
 }

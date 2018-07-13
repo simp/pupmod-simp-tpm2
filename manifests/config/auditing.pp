@@ -1,8 +1,4 @@
-# == Class tpm2::config::auditing
-#
-# This class is meant to be called from tpm2.
-# It ensures that auditing rules are defined.
-#
+# A private class to ensure that auditing rules are defined.
 class tpm2::config::auditing {
   assert_private()
 

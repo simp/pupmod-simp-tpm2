@@ -1,8 +1,4 @@
-# == Class tpm2::config::logging
-#
-# This class is meant to be called from tpm2.
-# It ensures that logging rules are defined.
-#
+# A private class to ensure that logging rules are defined.
 class tpm2::config::logging {
   assert_private()
 

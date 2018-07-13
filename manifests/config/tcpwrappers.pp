@@ -1,8 +1,4 @@
-# == Class tpm2::config::tcpwrappers
-#
-# This class is meant to be called from tpm2.
-# It ensures that tcpwrappers rules are defined.
-#
+# A private class to ensure that tcpwrappers rules are defined.
 class tpm2::config::tcpwrappers {
   assert_private()
 

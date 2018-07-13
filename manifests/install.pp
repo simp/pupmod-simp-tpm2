@@ -1,7 +1,4 @@
-# == Class tpm2::install
-#
 #  Install tpm2 packages
-#
 class tpm2::install {
   assert_private()
 

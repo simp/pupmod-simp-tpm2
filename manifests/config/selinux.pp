@@ -1,8 +1,4 @@
-# == Class tpm2::config::selinux
-#
-# This class is meant to be called from tpm2.
-# It ensures that selinux rules are defined.
-#
+# A private class to ensure that selinux rules are defined.
 class tpm2::config::selinux {
   assert_private()
 

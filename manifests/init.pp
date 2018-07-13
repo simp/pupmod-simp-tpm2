@@ -4,7 +4,12 @@
 #
 # @param package_ensure  The default ensure parmeter for packages.
 #
-# @param packages A Hash of packages needed for tpm2-tools
+# @param packages A Hash of packages needed for tpm2-tools.  The Hash format is:
+#
+#        ```yaml
+#        <package_name>':
+#           ensure: <ensure_value>
+#        ```
 #
 # @param take_ownership Enable to allow Puppet to take ownership
 #   of the TPM.
@@ -22,10 +27,9 @@ class tpm2 (
 ){
   simplib::assert_metadata( $module_name )
 
-  # do not attempt to install tpm2-tools, etc on a system that is known to have
-  # a TPM 1.2 device.
+  # There is no reason to install TPM2 resources on a host 
   if defined('$facts["tpm_version"]') and $facts['tpm_version' == 'tpm1'] {
-    notify{ "NOTICE: Skipping resources from module '${module_name}': \$tpm_version == 'tpm1'": }
+    notify{ "NOTICE: Host has a tpm1 device; skipping TPM2 resources from module '${module_name}'": }
   } else {
     include '::tpm2::install'
     include '::tpm2::config'

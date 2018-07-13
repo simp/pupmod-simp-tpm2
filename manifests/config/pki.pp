@@ -1,8 +1,4 @@
-# == Class tpm2::config::config::pki
-#
-# This class is meant to be called from tpm2.
-# It ensures that pki rules are defined.
-#
+# A private class to ensure that pki rules are defined.
 class tpm2::config::pki {
   assert_private()
 

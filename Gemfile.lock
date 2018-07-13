@@ -246,7 +246,7 @@ GEM
       puppet-lint (>= 1.0, < 3.0)
     puppet-lint-trailing_comma-check (0.3.2)
       puppet-lint (>= 1.0, < 3.0)
-    puppet-strings (1.2.1)
+    puppet-strings (2.1.0)
       rgen
       yard (~> 0.9.5)
     puppet-syntax (2.4.1)
@@ -386,7 +386,7 @@ GEM
       unf_ext
     unf_ext (0.0.7.5)
     websocket (1.2.5)
-    yard (0.9.12)
+    yard (0.9.14)
 
 PLATFORMS
   ruby

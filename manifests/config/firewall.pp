@@ -1,8 +1,4 @@
-# == Class tpm2::config::firewall
-#
-# This class is meant to be called from tpm2.
-# It ensures that firewall rules are defined.
-#
+# A private class to ensure that firewall rules are defined.
 class tpm2::config::firewall {
   assert_private()
 
