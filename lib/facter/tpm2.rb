@@ -2,7 +2,7 @@
 #
 # The fact will be nil if the tpm2-tools are either not available, or aren't
 # configured to comminucate with the TPM
-Facter.add('tpm2') do
+Facter.add( :tpm2 ) do
 
   #### NOTE: The confine below is intentionally commented out to explain why
   ####       we're not using it (or something like it), as we did with the `tpm`
@@ -48,9 +48,9 @@ Facter.add('tpm2') do
   # `:tpm_version` will always short-circuit if that fact is absent. (Facter
   # doesn't execute confine blocks for absent facts.)
   confine do
-     value = Facter[:tpm_version]
+    value = Facter.value(:tpm)
      Facter.debug 'tpm2 confine'
-     value.nil? || value != 'tpm1'
+     value.nil?
    end
 
   setcode do

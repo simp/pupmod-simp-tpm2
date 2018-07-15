@@ -62,20 +62,20 @@ describe Facter::TPM2::Util do
       end
     end
     context 'when tpm2-tools can query the TABRM' do
-      before :each do
-        allow(Facter::Core::Execution).to receive(:execute).with("#{@l_bin}/tpm2_pcrlist -s").and_return(
-          "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
-        )
-      end
-
-
       # Test against `tpm2_getcap -c properties-fixed` dumps from as many
       # manufacturers/models as we can find
       it 'should return a correct data structure queried from the TPM of any manufacturer' do
+        # Modeling an @base EL7 rpm install of tpm2-tools
+        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return(false)
+        allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( true )
+
         yaml_files = Dir.glob( File.expand_path( '../../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/*.yaml', __FILE__) )
         yaml_strings = yaml_files.map{ |yaml_file| File.read yaml_file }
         yaml_strings.each do |yaml_string|
-          allow(Facter::Core::Execution).to receive(:execute).with("#{@l_bin}/tpm2_getcap -c properties-fixed").and_return( yaml_string )
+          allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-fixed").and_return( yaml_string )
+        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_pcrlist -s").and_return(
+          "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
+        )
           util = Facter::TPM2::Util.new
           fact = util.build_structured_fact
           expect(fact).to be_a(Hash)
