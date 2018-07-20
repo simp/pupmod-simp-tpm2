@@ -70,7 +70,7 @@ Example:
 
   newparam(:name, :namevar => true) do
     desc 'The name of the resource has no impact.'
-    defaultto 'tpm0'
+    defaultto 'tpm2'
   end
 
   newparam(:in_hex, :boolean => true, :parent => Puppet::Parameter::Boolean) do
@@ -145,11 +145,22 @@ Example:
      #Determine if any of the *authset properties are set
      no_authsetvalues = self[:owner].nil? && self[:endorsement].nil? && self[:lock].nil?
      # If owned is not set then one of the authset values must be set
-     if self[:allauth].nil? 
-       fail('Either "allauth" or one of "owner, endorsement, lock" properties must be set.')  if no_authsetvalues
+     if self[:allauth].nil?
+       raise(Puppet::Error, 'Either "allauth" or one of "owner, endorsement, lock" properties must be set.')  if no_authsetvalues
      else
-       fail('cannot use both "allauth" and any of "owner, endorsement, lock"')  unless no_authsetvalues
+       raise(Puppet::Error, 'Cannot use both "allauth" and any of "owner, endorsement, lock"')  unless no_authsetvalues
      end
+
+     if self[:allauth] == :set
+       passwords_not_all_set = self[:owner_auth].empty? ||  self[:endorse_auth].empty? || self[:lock_auth].empty?
+       raise(Puppet::Error, 'Passwords for all auth parameters must be provided') if passwords_not_all_set
+     end
+
+     [[:owner,:owner_auth],[:lock,:lock_auth],[:endorsement, :endorse_auth]].each { |x,y|
+       if self[x] ==  :set
+         raise(Puppet::Error, "Password parameter, #{y}, must be provided when #{x} = 'set'") if self[y].empty?
+       end
+     }
    end
 
   autorequire(:package) do

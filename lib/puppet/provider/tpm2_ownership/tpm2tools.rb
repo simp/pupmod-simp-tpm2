@@ -78,7 +78,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     options = []
     case current
     when 'set'
-      fail("The current state is set and password is not provided.  The password must be provided even if a change is not required") if value[:passwd].nil?
+      fail("The current state is set and password is not provided.  The password must be provided even if a change is not required") if value[:passwd].empty?
       options << [ "-#{value[:opt]}.uppercase", value[:opt] ]
       # If the auth is set and we don't want to clear it then you have to give it the password
       #  to set the password or the command will fail.
@@ -113,7 +113,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     # Check if lockAuth is set and pass in the password to the
     # options if it is.
     if current[:lock] == 'set'
-      return "Cannot clear the authorization on tpm.  Lock auth is set but no password was supplied") if resource[:lock_auth].nil?
+      return "Cannot clear the authorization on tpm.  Lock auth is set but no password was supplied" if resource[:lock_auth].nil?
       options << ["-l","#{resource[:lock_auth]}"]
     end
     begin
@@ -184,7 +184,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     # any of them are set
     if @property_flush[:allauth] == :clear
       cleared = true
-      @to_opt.keys.each { |x| if status[x] == 'set' cleared = false }
+      @to_opt.keys.each { |x| if status[x] == 'set' then cleared = false end }
       unless cleared
         output = clear_ownership(current)
         unless output.nil?
