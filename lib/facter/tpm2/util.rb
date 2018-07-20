@@ -71,18 +71,37 @@ class Facter::TPM2::Util
   # @param [Hash] properties, as collected by `tpm2_getcap -c properties-fixed`
   #
   # @return [Hash] Decoded
-  def failure_safe_properties(tpm2_properties)
+  def failure_safe_properties(fixed_props,variable_props)
     {
       'manufacturer'     => decode_uint32_string(
-                              tpm2_properties['TPM_PT_MANUFACTURER']
+                              fixed_props['TPM_PT_MANUFACTURER']
                             ),
-      'vendor_strings'   => tpm2_vendor_strings( tpm2_properties ),
+      'vendor_strings'   => tpm2_vendor_strings( fixed_props ),
       'firmware_version' => tpm2_firmware_version(
-                              tpm2_properties['TPM_PT_FIRMWARE_VERSION_1'],
-                              tpm2_properties['TPM_PT_FIRMWARE_VERSION_2']
+                              fixed_props['TPM_PT_FIRMWARE_VERSION_1'],
+                              fixed_props['TPM_PT_FIRMWARE_VERSION_2']
                             ),
-      'tpm2_getcap'      => { 'properties-fixed' => tpm2_properties }
+      'status'           => get_status(variable_props['TPM_PT_PERSISTENT']),
+
+      'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
     }
+  end
+
+  def get_status(settings)
+    status = Hash.new
+   ['ownerAuthSet','endorsementAuthSet','lockoutAuthSet','disableClear','inLockout','tpmGeneratedEPS'].each {|l|
+      x = 'unknown'
+      if settings.has_key?(l)
+        case settings[l]
+        when 'clear'
+          x = false
+        when 'set'
+          x = true
+        end
+      end
+      status[l] = x
+    }
+    status
   end
 
   # Returns a structured fact describing the TPM 2.0 data
@@ -101,11 +120,15 @@ class Facter::TPM2::Util
       return nil
     end
 
+    # Get fixed properties
     yaml = exec('tpm2_getcap -c properties-fixed')
     properties_fixed = YAML.safe_load(yaml)
+    #Get variable properties
+    yaml = exec('tpm2_getcap -c properties-variable')
+    properties_variable = YAML.safe_load(yaml)
 
-    result = failure_safe_properties(properties_fixed)
-    result
+    failure_safe_properties(properties_fixed, properties_variable)
+
   end
 
   # Returns the path of the tpm2-tools binaries
