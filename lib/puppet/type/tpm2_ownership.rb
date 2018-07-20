@@ -104,6 +104,7 @@ Example:
   end
 
   newparam(:socket_address) do
+    # TODO verify IP Address or domain name (This has to be done somewhere already)
     desc "The domain name or IP address used by the socket TCTI"
     defaultto '127.0.0.1'
   end
