@@ -28,7 +28,9 @@ Example:
   include 'tpm'
 
   tpm2_ownership { 'tpm0':
-    owned        =>  set,
+    owner        =>  set,
+    lock         =>  set,
+    endorsement  =>  set,
     owner_auth   => 'badpass',
     lock_auth    => 'badpass',
     endorse_auth => 'badpass',
@@ -122,40 +124,22 @@ Example:
 # End of TCTI Params
   newproperty(:owner) do
     desc ' Seting for owner authorization'
-    newvalues(:clear, :set )
+    newvalues(:clear, :set)
   end
 
   newproperty(:endorsement) do
     desc ' Seting for owner authorization'
-    newvalues(:clear, :set )
+    newvalues(:clear, :set)
   end
 
   newproperty(:lock) do
     desc ' Seting for owner authorization'
-    newvalues(:clear, :set )
+    newvalues(:clear, :set)
   end
 
-  newproperty(:allauth) do
-    desc 'Use to set all three authorizations to all set or all cleared.  If you want to
-           set them differently, use the individual settings.'
-    newvalues(:clear, :set )
-  end
 
   #Global Validation
    validate do
-     #Determine if any of the *authset properties are set
-     no_authsetvalues = self[:owner].nil? && self[:endorsement].nil? && self[:lock].nil?
-     # If owned is not set then one of the authset values must be set
-     if self[:allauth].nil?
-       raise(Puppet::Error, 'Either "allauth" or one of "owner, endorsement, lock" properties must be set.')  if no_authsetvalues
-     else
-       raise(Puppet::Error, 'Cannot use both "allauth" and any of "owner, endorsement, lock"')  unless no_authsetvalues
-     end
-
-     if self[:allauth] == :set
-       passwords_not_all_set = self[:owner_auth].empty? ||  self[:endorse_auth].empty? || self[:lock_auth].empty?
-       raise(Puppet::Error, 'Passwords for all auth parameters must be provided') if passwords_not_all_set
-     end
 
      [[:owner,:owner_auth],[:lock,:lock_auth],[:endorsement, :endorse_auth]].each { |x,y|
        if self[x] ==  :set

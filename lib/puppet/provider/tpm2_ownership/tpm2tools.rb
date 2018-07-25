@@ -8,6 +8,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
 
   has_feature :take_ownership
 
+  mk_resource_methods
   defaultfor :kernel => :Linux
 
   commands :tpm2_takeownership => 'tpm2_takeownership'
@@ -16,6 +17,33 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
   def initialize(value={})
     super(value)
     @property_flush = {}
+  end
+
+
+  # Generate standard args for connecting to the TPM.  These arguements
+  # are common for most TPM2 commands.
+  #
+  # @return [String] Return a string of the tcti and the
+  # hex option if it is set.
+  def get_extra_args()
+    options = []
+
+    debug('tpm2_takeownership setting tcti args.')
+    case resource[:tcti]
+    when :devicefile
+      options << ["--tcti", "device","-d", "#{resource[:devicefile]}"]
+    when :socket
+      options << ["--tcti", "socket", "-R", "#{resource[:socket_address]}", "-p", "#{resource[:socket_port]}"]
+    else
+      options << ["--tcti", "abrmd"]
+    end
+
+    options << ["-X"] if resource[:in_hex]
+
+    options
+  end
+
+  def get_passwd_options(current, desired)
     @to_opts    = {:owner       => {:passwd => resource[:owner_auth],
                                     :opt => 'o'},
                    :endorsement => {:passwd => resource[:endorse_auth],
@@ -23,84 +51,36 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
                    :lock        => {:passwd => resource[:lock_auth],
                                     :opt => 'l'}
                   }
+    @to_opts.map { |k, v| passwd_options(current[k], desired[k], v) }
   end
 
-  # Dump the owner password to a flat file
-  #
-  # @param [String] path where fact will be dumped
-  def dump_pass(name, vardir)
-    require 'json'
 
-    pass_file = File.expand_path("#{vardir}/simp/#{name}/#{name}data.json")
-
-    passwords = { "owner_auth"   => resource[:owner_auth],
-                  "lock_auth"    => resource[:lock_auth],
-                  "endorse_auth" => resource[:endorsement_auth]
-                }
-    # Check to make sure the SIMP directory in vardir exists, or create it
-    if !File.directory?( File.dirname(pass_file) )
-      FileUtils.mkdir_p( File.dirname(pass_file), :mode => 0750 )
-      FileUtils.chown( 'root','root', File.dirname(pass_file) )
-      FileUtils.chmod 0700, File.dirname(pass_file)
-    end
-
-    # Dump the password to pass_file
-    file = File.new( pass_file, 'w', 0600 )
-    file.write( passwords.to_json )
-    file.close
-
-  end
-
-  # Generate standard args for connecting to the TPM.  These arguements
-  # are common for most TPM2 commands.
-  #
-  # @return [String] Return a string of the tcti and the
-  # hex option if it is set.
-  def gen_extra_args()
-    options = []
-
-    debug('tpm2_takeownership setting tcti args.')
-    case resource[:tcti]
-    when :devicefile
-      options << ["--tcti device","-d", "#{resource[:devicefile]}"]
-    when :socket
-      options << ["--tcti socket", "-R", "#{resource[:socket_address]}", "-p", "#{resource[:socket_port]}"]
-    else
-      options << ["--tcti abrmd"]
-    end
-
-    options << "-X" if resource[:in_hex]
-
-    options
-  end
-
-  def get_passwd_options(current, desired, value)
+  def passwd_options(current, desired, value)
     options = []
     case current
-    when 'set'
+    when :set
       fail("The current state is set and password is not provided.  The password must be provided even if a change is not required") if value[:passwd].empty?
-      options << [ "-#{value[:opt]}.uppercase", value[:opt] ]
+      options << [ "-#{value[:opt]}".upcase, value[:passwd]]
       # If the auth is set and we don't want to clear it then you have to give it the password
       #  to set the password or the command will fail.
-      if desired.nil? || desired == 'set'
+      if desired.nil? || desired == :set 
 
-        options << [ "-#{value[:opt]}", value[:opt] ]
+        options <<  ["-#{value[:opt]}", value[:passwd]]
       end
-    when 'clear'
-      if desired[value] == 'set'
-        options << [ "-#{value[:opt]}", value[:opt] ]
+    when :clear
+      if desired == :set
+        options << [ "-#{value[:opt]}", value[:passwd]]
       end
     else
       return
     end
-    options
+    options.flatten
   end
 
   def take_ownership(current, desired)
 
-    password_options = @to_opts.map { |k, v| get_passwd_options(current[k], desired[k], v) }
     begin
-      tpm2_takeownership(get_extra_args,password_options)
+      tpm2_takeownership(get_extra_args,get_passwd_options(current,desired))
       return
     rescue Puppet::ExecutionFailure => e
       warn("tpm2_takeownership failed with error -> #{e.inspect}")
@@ -112,9 +92,9 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     options << "-c"
     # Check if lockAuth is set and pass in the password to the
     # options if it is.
-    if current[:lock] == 'set'
+    if current[:lock] == :set
       return "Cannot clear the authorization on tpm.  Lock auth is set but no password was supplied" if resource[:lock_auth].nil?
-      options << ["-l","#{resource[:lock_auth]}"]
+      options << ["-L","#{resource[:lock_auth]}"]
     end
     begin
       tpm2_takeownership(get_extra_args, options)
@@ -125,19 +105,23 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     end
   end
 
+  def status(x)
+    @current_status || @current_status = get_status
+    @current_status[x]
+  end
+
   # Check and see if the data file exists for the tpm.  In version 2 you can
   # use tpm2_dump_capability to check what passwords are set.
   def get_tpm_status
     begin
-      yaml = tpm2_getcap(get_extra_args, -c, 'properties-variable')
-    rescue Puppet::ExecutionFailure => e
-      fail("tpm2_getcap failed with error -> #{e.inspect}")
-      return e
+      yaml = tpm2_getcap(get_extra_args, '-c', 'properties-variable')
+      properties_variable = YAML.safe_load(yaml)
+    rescue
+      fail("Failed to retrieve data from tpm2_getcap ")
     end
-    properties_variable = YAML.safe_load(yaml)
 
-    unless properties_variable.has_key?('TPM_PT_PERSISTENT')
-      fail("tpm2_takeownership: tpm2_getcap did not return 'TPM_PT_PERSISTENT' data.")
+    unless properties_variable.instance_of?(Hash) && properties_variable.has_key?('TPM_PT_PERSISTENT')
+      fail("tpm2_getcap did not return 'TPM_PT_PERSISTENT' data.")
     end
 
     status = Hash.new
@@ -145,21 +129,28 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     properties_variable['TPM_PT_PERSISTENT'].each { |k,v|
       case k
       when 'ownerAuthSet'
-         status[:owner] = v
+         status[:owner] = v.to_sym
       when 'endorsementAuthSet'
-        status[:endorsement] = v
+        status[:endorsement] = v.to_sym
       when 'lockoutAuthSet'
-         status[:lock] = v
+         status[:lock] = v.to_sym
       else
-          status[k] = v
+          status[k] = v.to_sym
       end
     }
     status
   end
 
-  def allauth=(should)
-    debug 'tpm2: Setting allauth property_flush to should'
-    @property_flush[:allauth] = should
+  def owner
+    status(:owner)
+  end
+
+  def lock
+    status(:lock)
+  end
+
+  def endorsement
+    status(:endorsement)
   end
 
   def owner=(should)
@@ -178,40 +169,25 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
   end
 
   def flush
-    current = get_tpm_status
+    current = @current_status
+    desired = @property_flush
     debug 'tpm2: Flushing tpm2_ownership'
-    # If they asked to clear the settings check if
-    # any of them are set
-    if @property_flush[:allauth] == :clear
-      cleared = true
-      @to_opt.keys.each { |x| if status[x] == 'set' then cleared = false end }
-      unless cleared
+    # Check if there is something to do and while you are at it check if they
+    # are all set to clear.
+    @something_to_do = false
+    @clear_all = true
+    desired.keys.each { |x|
+      desired[x] == current[x] || @something_to_do = true
+      desired[x] == :clear || @clear_all = false
+    }
+    if @something_to_do
+      if @clear_all
         output = clear_ownership(current)
         unless output.nil?
           fail Puppet::Error,"Could not take ownership of the tpm. Error from tpm2_takeownership is #{output}"
         end
-      end
-    else
-    # If they want to set ownership auth
-      desired = Hash.new
-      # Set the desired state for each auth value
-      @to_opt.keys.each { |x|
-        if @property_flush[:allauth] = :set
-          desired[x] = 'set'
-        else
-          desired[x] = @property_flush[x]
-        end
-      }
-      # Check it the current and desired states match.
-      states_match = true
-      @to_opt.keys.each { |x|
-        unless desired[x].nil?
-          if  current[x] != desired[x]
-             states_match = false
-          end
-        end
-      }
-      unless states_match
+      else
+        # Set the desired state for each auth value
         output = take_ownership(current, desired)
         unless output.nil?
            fail Puppet::Error,"Could not take ownership of the tpm. Error from tpm2_takeownership is #{output}"

@@ -3,15 +3,25 @@ require 'json'
 
 describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
 
-  let(:provider) { resource.provider }
 
   let(:tpmdata1) {
-    YAML.load(File.read(File.expand_path('spec/files/tpmdata1')))
+    File.read(File.expand_path('spec/files/tpmdata1'))
   }
 
   let(:tpmdata2) {
-    YAML.load(File.read(File.expand_path('spec/files/tpmdata2')))
+    File.read(File.expand_path('spec/files/tpmdata2'))
   }
+
+  let (:expected_hash1) {{
+    :owner => :clear,
+    :endorsement => :clear,
+    :lock => :clear,
+    'reserved1' => :clear,
+    'disableClear' => :clear,
+    'inLockout' => :clear,
+    'tpmGeneratedEPS' => :set,
+    'reserved2' => :clear,
+  }}
 
   let(:resource) {
     Puppet::Type.type(:tpm2_ownership).new({
@@ -26,155 +36,137 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
     })
   }
 
-  before :each do
-    Puppet.stubs(:[]).with(:vardir).returns('/tmp')
-    Facter.stubs(:value).with(:has_tpm).returns(true)
-    Facter.stubs(:value).with(:tpm).returns(tpm_fact)
-    FileUtils.stubs(:chown).with('root','root', '/tmp/simp').returns true
+  let(:provider) { resource.provider }
+
+  
+  describe 'get_extra_args' do
+    context 'with default parameters' do
+      let(:resource) {
+        Puppet::Type.type(:tpm2_ownership).new({
+          :name         => 'tpm2',
+          :owner_auth   => 'ownerpassword',
+          :lock_auth    => 'lockpassword',
+          :endorse_auth => 'endorsepassword',
+          :owner        => 'set',
+          :provider     => 'tpm2tools'
+        })
+      }
+      it 'should return defaults' do
+        options = provider.get_extra_args
+        expect(options).to eq([
+          ["--tcti", "abrmd"]
+        ])
+      end
+    end
+    context 'with socket set and in_hex set' do
+      let(:resource) {
+        Puppet::Type.type(:tpm2_ownership).new({
+          :name           => 'tpm2',
+          :owner_auth     => 'ownerpassword',
+          :lock_auth      => 'lockpassword',
+          :endorse_auth   => 'endorsepassword',
+          :owner          => 'set',
+          :tcti           => 'socket',
+          :socket_address => '8.8.8.8',
+          :in_hex         => true,
+          :provider       => 'tpm2tools'
+        })
+      }
+      it 'should return socket and hex parameters' do
+        options = provider.get_extra_args
+        expect(options).to eq([
+         [ "--tcti", "socket" , "-R", "8.8.8.8", "-p" , "2323"],
+         [ "-X"]
+        ])
+      end
+    end
   end
-
-  after :each do
-    ENV['MOCK_TIMEOUT'] = nil
-  end
-
-
-  describe 'dump_owner_pass' do
+  
+  describe 'get_tpm_status' do
     let(:resource) {
-      Puppet::Type.type(:tpm_ownership).new({
-        :name            => 'tpm0',
-        :owner_pass      => 'twentycharacters0000',
-        :srk_pass        => 'twentycharacters1111',
-        :advanced_facts  => true,
-        :provider        => 'trousers'
+      Puppet::Type.type(:tpm2_ownership).new({
+        :name         => 'tpm2',
+        :owner_auth   => 'ownerpassword',
+        :lock_auth    => 'lockpassword',
+        :endorse_auth => 'endorsepassword',
+        :owner        => 'set',
+        :provider     => 'tpm2tools'
       })
     }
-    let(:loc) { '/tmp' }
-    after :each do
-      file = "#{loc}/simp/tpm_ownership_owner_pass"
-      FileUtils.rm(file) if File.exists? file
-    end
-
-    context 'with advanced_facts => false' do
-      it 'should not do a thing' do
-        expect(File.exists?("#{loc}/simp/tpm_ownership_owner_pass")).to be_falsey
+    context 'with valid input' do
+      it 'should return a hash of settings' do
+#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns('bad data: junk')
+        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return(tpmdata1)
+        status = provider.get_tpm_status
+        expect(status).to eq(expected_hash1)
       end
     end
-    context 'with advanced_facts => true' do
-      it 'should drop off the password file' do
-        expect(provider.dump_owner_pass(loc)).to match(/twentycharacters0000/)
-        expect(File.exists?("#{loc}/simp/tpm_ownership_owner_pass")).to be_truthy
+    context 'with no TPM_PT_PERSISTENT data returned' do
+      it 'should return an error' do
+#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns('bad data: junk')
+        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return('bad data: junk')
+        expect { provider.get_tpm_status }.to raise_error(/tpm2_getcap did not return 'TPM_PT_PERSISTENT' data/)
       end
     end
-  end
-
-  describe 'tpm_takeownership' do
-    let(:stdin) {[
-      [ /owner password/i,   resource[:owner_pass] ],
-      [ /Confirm password/i, resource[:owner_pass] ],
-      [ /SRK password/i,     resource[:srk_pass]   ],
-      [ /Confirm password/i, resource[:srk_pass]   ],
-    ]}
-    let(:mock_script) { File.expand_path('spec/files/mock_tpm_takeownership.rb') }
-
-    it 'interact with the test script normally' do
-      expect(provider.tpm_takeownership( stdin, mock_script )).to be_truthy
-    end
-
-    it 'errors when it times out' do
-      ENV['MOCK_TIMEOUT'] = 'yes'
-      expect(provider.tpm_takeownership( stdin, mock_script )).to be_falsey
-    end
-  end
-
-  describe 'generate_args' do
-    context 'both passwords specified' do
-      let(:resource) {
-        Puppet::Type.type(:tpm_ownership).new({
-          :name       => 'tpm0',
-          :owner_pass => 'twentycharacters0000',
-          :srk_pass   => 'twentycharacters1111',
-          :provider   => 'trousers'
-        })
-      }
-      it 'should generate patterns for owner and srk passwords' do
-        stdin, cmd = provider.generate_args
-
-        expect(stdin).to eq([
-          [ /owner password/i,   'twentycharacters0000'  ],
-          [ /Confirm password/i, 'twentycharacters0000'  ],
-          [ /SRK password/i,     'twentycharacters1111' ],
-          [ /Confirm password/i, 'twentycharacters1111' ],
-        ])
-        expect(cmd).to eq('tpm_takeownership')
-      end
-    end
-
-    context 'well-known owner password' do
-      let(:resource) {
-        Puppet::Type.type(:tpm_ownership).new({
-          :name       => 'tpm0',
-          :owner_pass => 'well-known',
-          :srk_pass   => 'twentycharacters1111',
-          :provider   => 'trousers'
-        })
-      }
-      it 'should generate patterns for only SRK pass and a proper cmd' do
-        stdin, cmd = provider.generate_args
-
-        expect(stdin).to eq([
-          [ /SRK password/i,     'twentycharacters1111' ],
-          [ /Confirm password/i, 'twentycharacters1111' ],
-        ])
-        expect(cmd).to eq('tpm_takeownership -y')
-      end
-    end
-
-    context 'well-known SRK password' do
-      let(:resource) {
-        Puppet::Type.type(:tpm_ownership).new({
-          :name       => 'tpm0',
-          :owner_pass => 'twentycharacters0000',
-          :srk_pass   => 'well-known',
-          :provider   => 'trousers'
-        })
-      }
-      it 'should generate patterns for only owner pass and a proper cmd' do
-        stdin, cmd = provider.generate_args
-
-        expect(stdin).to eq([
-          [ /owner password/i,   'twentycharacters0000'  ],
-          [ /Confirm password/i, 'twentycharacters0000'  ],
-        ])
-        expect(cmd).to eq('tpm_takeownership -z')
-      end
-    end
-
-    context 'both well-known passwords' do
-      let(:resource) {
-        Puppet::Type.type(:tpm_ownership).new({
-          :name       => 'tpm0',
-          :owner_pass => 'well-known',
-          :srk_pass   => 'well-known',
-          :provider   => 'trousers'
-        })
-      }
-      it 'should generate no patterns and a proper cmd' do
-        stdin, cmd = provider.generate_args
-
-        expect(stdin).to eq([])
-        expect(cmd).to eq('tpm_takeownership -y -z')
+    context 'with invalid input' do
+     it 'should return an error' do
+#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns('bad data')
+        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return('bad data')
+        expect { provider.get_tpm_status }.to raise_error(/tpm2_getcap did not return 'TPM_PT_PERSISTENT' data/)
       end
     end
   end
 
-  describe 'read_sys' do
-    it 'should construct an instances hash from /sys/class/tpm' do
-      mock_sys = 'spec/files/tpm/'
-      expected = [{
-        :name  => 'tpm',
-        :owned => :true,
-      }]
-      expect(provider.class.read_sys(mock_sys)).to eq(expected)
+  describe 'get_password_options' do
+    let(:resource) {
+      Puppet::Type.type(:tpm2_ownership).new({
+        :name         => 'tpm2',
+        :owner_auth   => 'ownerpassword',
+        :lock_auth    => 'lockpassword',
+        :endorse_auth => 'endorsepassword',
+        :owner        => 'set',
+        :lock         => 'set',
+        :endorsement  => 'set',
+        :provider     => 'tpm2tools'
+      })
+    }
+    context 'first set' do
+      let (:current1) {{
+        :owner => :clear,
+        :endorsement => :clear,
+        :lock => :clear,
+      }}
+      let (:desired1) {{
+        :owner => :set,
+        :endorsement => :set,
+        :lock => :set,
+      }}
+      it 'should return lower case options for all passwords' do
+        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return(tpmdata1)
+#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns(tpmdata1)
+        passwd_args = provider.get_passwd_options(current1,desired1)
+        expect(passwd_args).to eq([['-o','ownerpassword'],['-e','endorsepassword'],['-l','lockpassword']])
+      end
+    end
+    context 'second set' do
+      # If current = set and desired = set then you must clear it and set it, hence ['-O','ownerpassword','-o','ownerpassword']
+      # If current = clear and desired = set then you need to set it, hence ['-e','endorsepassword']
+      # if current = set and desired = clear then you need to clear it, hence ['-L','lockpassword']
+      let (:current2) {{
+        :owner => :set,
+        :endorsement => :clear,
+        :lock => :set,
+      }}
+      let (:desired2) {{
+        :owner => :set,
+        :endorsement => :set,
+        :lock => :clear,
+      }}
+      it 'should return set for all passwords' do
+        passwd_args = provider.get_passwd_options(current2,desired2)
+        expect(passwd_args).to eq([['-O','ownerpassword','-o','ownerpassword'],['-e','endorsepassword'],['-L','lockpassword']])
+      end
     end
   end
+
 end

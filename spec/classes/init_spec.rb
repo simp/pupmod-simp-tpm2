@@ -9,7 +9,7 @@ xmessage = 'TODO: validate this spec, then activate or remove it.'
 #
 describe 'tpm2' do
   on_supported_os.each do |os, os_facts|
-    context "on #{os}" do
+    context "tpm2 init on #{os}" do
       let(:facts) do
         os_facts.merge({
         })
@@ -64,7 +64,7 @@ describe 'tpm2' do
           end
         end
 
-        context 'with take_ownership true', skip: xmessage do
+        context 'with take_ownership true' do
           let(:params) {{ :take_ownership => true }}
 
           if os_facts[:os][:release][:major].to_i < 7
@@ -75,9 +75,8 @@ describe 'tpm2' do
             context 'on os version >= 7 ' do
               it { is_expected.to compile.with_all_deps }
               it { is_expected.to create_class('tpm2') }
-              it { is_expected.not_to create_class('tpm2::ima') }
-              it { is_expected.to create_class('tpm2::tpm2::ownership') }
-              it { is_expected.to create_class('tpm2::tpm2::install') }
+              it { is_expected.to create_class('tpm2::ownership') }
+              it { is_expected.to create_class('tpm2::install') }
               it { is_expected.to contain_package('tpm2-tools').with_ensure('installed') }
               it { is_expected.to contain_package('tpm2-tss').with_ensure('installed') }
               it { is_expected.to contain_package('tpm2-abrmd').with_ensure('installed') }

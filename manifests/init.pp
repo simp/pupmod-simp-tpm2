@@ -41,7 +41,7 @@ class tpm2 (
     }
 
     if $take_ownership {
-      include '::tpm2::take_ownership'
+      include '::tpm2::ownership'
     }
   }
 }
