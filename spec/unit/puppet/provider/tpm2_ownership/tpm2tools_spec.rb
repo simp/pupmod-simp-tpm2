@@ -1,17 +1,23 @@
 require 'spec_helper'
 require 'json'
+require 'yaml'
+require 'facter'
 
 describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
 
 
-  let(:tpmdata1) {
-    File.read(File.expand_path('spec/files/tpmdata1'))
+
+  let(:all_clear) {
+    YAML.safe_load(File.read(File.expand_path('spec/files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml')))
   }
 
-  let(:tpmdata2) {
-    File.read(File.expand_path('spec/files/tpmdata2'))
+  let(:all_set) {
+    YAML.safe_load(File.read(File.expand_path('spec/files/tpm2/mocks/tpm2_getcap_-c_properties-variable/set-set-set.yaml')))
   }
 
+  let(:mixed) {
+    YAML.safe_load(File.read(File.expand_path('spec/files/tpm2/mocks/tpm2_getcap_-c_properties-variable/set-set-clear.yaml')))
+  }
   let (:expected_hash1) {{
     :owner => :clear,
     :endorsement => :clear,
@@ -38,98 +44,8 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
 
   let(:provider) { resource.provider }
 
-  
-  describe 'get_extra_args' do
-    context 'with default parameters' do
-      let(:resource) {
-        Puppet::Type.type(:tpm2_ownership).new({
-          :name         => 'tpm2',
-          :owner_auth   => 'ownerpassword',
-          :lock_auth    => 'lockpassword',
-          :endorse_auth => 'endorsepassword',
-          :owner        => 'set',
-          :provider     => 'tpm2tools'
-        })
-      }
-      it 'should return defaults' do
-        options = provider.get_extra_args
-        expect(options).to eq([
-          ["--tcti", "abrmd"]
-        ])
-      end
-    end
-    context 'with socket set and in_hex set' do
-      let(:resource) {
-        Puppet::Type.type(:tpm2_ownership).new({
-          :name           => 'tpm2',
-          :owner_auth     => 'ownerpassword',
-          :lock_auth      => 'lockpassword',
-          :endorse_auth   => 'endorsepassword',
-          :owner          => 'set',
-          :tcti           => 'socket',
-          :socket_address => '8.8.8.8',
-          :in_hex         => true,
-          :provider       => 'tpm2tools'
-        })
-      }
-      it 'should return socket and hex parameters' do
-        options = provider.get_extra_args
-        expect(options).to eq([
-         [ "--tcti", "socket" , "-R", "8.8.8.8", "-p" , "2323"],
-         [ "-X"]
-        ])
-      end
-    end
-  end
-  
-  describe 'get_tpm_status' do
-    let(:resource) {
-      Puppet::Type.type(:tpm2_ownership).new({
-        :name         => 'tpm2',
-        :owner_auth   => 'ownerpassword',
-        :lock_auth    => 'lockpassword',
-        :endorse_auth => 'endorsepassword',
-        :owner        => 'set',
-        :provider     => 'tpm2tools'
-      })
-    }
-    context 'with valid input' do
-      it 'should return a hash of settings' do
-#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns('bad data: junk')
-        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return(tpmdata1)
-        status = provider.get_tpm_status
-        expect(status).to eq(expected_hash1)
-      end
-    end
-    context 'with no TPM_PT_PERSISTENT data returned' do
-      it 'should return an error' do
-#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns('bad data: junk')
-        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return('bad data: junk')
-        expect { provider.get_tpm_status }.to raise_error(/tpm2_getcap did not return 'TPM_PT_PERSISTENT' data/)
-      end
-    end
-    context 'with invalid input' do
-     it 'should return an error' do
-#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns('bad data')
-        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return('bad data')
-        expect { provider.get_tpm_status }.to raise_error(/tpm2_getcap did not return 'TPM_PT_PERSISTENT' data/)
-      end
-    end
-  end
 
   describe 'get_password_options' do
-    let(:resource) {
-      Puppet::Type.type(:tpm2_ownership).new({
-        :name         => 'tpm2',
-        :owner_auth   => 'ownerpassword',
-        :lock_auth    => 'lockpassword',
-        :endorse_auth => 'endorsepassword',
-        :owner        => 'set',
-        :lock         => 'set',
-        :endorsement  => 'set',
-        :provider     => 'tpm2tools'
-      })
-    }
     context 'first set' do
       let (:current1) {{
         :owner => :clear,
@@ -141,9 +57,23 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
         :endorsement => :set,
         :lock => :set,
       }}
+      let (:facts) {{
+        :tpm2 => {'tpm2_getcap' => { 'properties-variable' => all_clear}, 'auth_status' => true }
+      }}
       it 'should return lower case options for all passwords' do
-        allow(provider).to receive(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').and_return(tpmdata1)
-#        provider.stubs(:tpm2_getcap).with([["--tcti","abrmd"]],'-c', 'properties-variable').returns(tpmdata1)
+#        Facter.clear
+#        allow(Facter).to receive(:fact).with(:tpm2).and_return(Facter.add(:tpm2) {setcode {{'tpm2_getcap' => { 'properties-variable' => all_clear}, 'auth_status' => true }}})
+        resource = Puppet::Type.type(:tpm2_ownership).new({
+          :name         => 'tpm2',
+          :owner_auth   => 'ownerpassword',
+          :lock_auth    => 'lockpassword',
+          :endorse_auth => 'endorsepassword',
+          :owner        => 'set',
+          :lock         => 'set',
+          :endorsement  => 'set',
+          :provider     => 'tpm2tools'
+        })
+        provider = resource.provider
         passwd_args = provider.get_passwd_options(current1,desired1)
         expect(passwd_args).to eq([['-o','ownerpassword'],['-e','endorsepassword'],['-l','lockpassword']])
       end
@@ -163,6 +93,18 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
         :lock => :clear,
       }}
       it 'should return set for all passwords' do
+        allow(Facter).to receive(:value).with(:tpm2).and_return({'tpm2_getcap' => { 'properties-variable' => mixed }, 'auth_status' => true })
+        resource =  Puppet::Type.type(:tpm2_ownership).new({
+          :name         => 'tpm2',
+          :owner_auth   => 'ownerpassword',
+          :lock_auth    => 'lockpassword',
+          :endorse_auth => 'endorsepassword',
+          :owner        => 'set',
+          :lock         => 'clear',
+          :endorsement  => 'set',
+          :provider     => 'tpm2tools'
+        })
+        provider = resource.provider
         passwd_args = provider.get_passwd_options(current2,desired2)
         expect(passwd_args).to eq([['-O','ownerpassword','-o','ownerpassword'],['-e','endorsepassword'],['-L','lockpassword']])
       end

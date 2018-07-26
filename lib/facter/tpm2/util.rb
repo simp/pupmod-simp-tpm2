@@ -62,6 +62,7 @@ class Facter::TPM2::Util
     ]
   end
 
+
   # Decode properties that the TPM is required to provide, even in failure mode
   #
   # The property keys and values are made as human-readable as possible.
@@ -71,17 +72,19 @@ class Facter::TPM2::Util
   # @param [Hash] properties, as collected by `tpm2_getcap -c properties-fixed`
   #
   # @return [Hash] Decoded
-  def failure_safe_properties(tpm2_properties)
+  def failure_safe_properties(fixed_props,variable_props)
     {
       'manufacturer'     => decode_uint32_string(
-                              tpm2_properties['TPM_PT_MANUFACTURER']
+                              fixed_props['TPM_PT_MANUFACTURER']
                             ),
-      'vendor_strings'   => tpm2_vendor_strings( tpm2_properties ),
+      'vendor_strings'   => tpm2_vendor_strings( fixed_props ),
       'firmware_version' => tpm2_firmware_version(
-                              tpm2_properties['TPM_PT_FIRMWARE_VERSION_1'],
-                              tpm2_properties['TPM_PT_FIRMWARE_VERSION_2']
+                              fixed_props['TPM_PT_FIRMWARE_VERSION_1'],
+                              fixed_props['TPM_PT_FIRMWARE_VERSION_2']
                             ),
-      'tpm2_getcap'      => { 'properties-fixed' => tpm2_properties }
+      'auth_status'      => variable_props.has_key?('TPM_PT_PERSISTENT'),
+
+      'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
     }
   end
 
@@ -101,11 +104,15 @@ class Facter::TPM2::Util
       return nil
     end
 
+    # Get fixed properties
     yaml = exec('tpm2_getcap -c properties-fixed')
     properties_fixed = YAML.safe_load(yaml)
+    #Get variable properties
+    yaml = exec('tpm2_getcap -c properties-variable')
+    properties_variable = YAML.safe_load(yaml)
 
-    result = failure_safe_properties(properties_fixed)
-    result
+    failure_safe_properties(properties_fixed, properties_variable)
+
   end
 
   # Returns the path of the tpm2-tools binaries

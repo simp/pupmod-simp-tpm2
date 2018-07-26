@@ -85,43 +85,6 @@ Example:
     defaultto 'false'
   end
 
-# The following TCTI properties are common to most tpm2-tools commands. These are used in
-#  Later versions of the tools and are not active yet.
-
-  newparam(:tcti) do
-    desc "The TCTI used for communication with the next component down the
-              TSS stack"
-    newvalues(:device,:socket,:abrmd)
-    defaultto :abrmd
-  end
-
-  newparam(:devicefile) do
-    desc "The TPM device file for use by the device TCTI"
-    validate do |value|
-      unless Puppet::Util.absolute_path?(value)
-        raise(Puppet::Error, "The device file must be an absolute path")
-      end
-    end
-    defaultto '/dev/tpm0'
-  end
-
-  newparam(:socket_address) do
-    # TODO verify IP Address or domain name (This has to be done somewhere already)
-    desc "The domain name or IP address used by the socket TCTI"
-    defaultto '127.0.0.1'
-  end
-
-  newparam(:socket_port) do
-    desc "The port number used by the socket TCTI"
-    validate do |value|
-      unless value.is_a?(Integer)
-        raise(Puppet::Error, "endorse_auth must be an Integer, not '#{value.class}'")
-      end
-    end
-    defaultto 2323
-  end
-
-# End of TCTI Params
   newproperty(:owner) do
     desc ' Seting for owner authorization'
     newvalues(:clear, :set)

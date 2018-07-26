@@ -8,11 +8,10 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
 
   has_feature :take_ownership
 
-  mk_resource_methods
   defaultfor :kernel => :Linux
 
   commands :tpm2_takeownership => 'tpm2_takeownership'
-  commands :tpm2_getcap        => 'tpm2_getcap'
+  confine  :tpm2['auth_status'] => true
 
   def initialize(value={})
     super(value)
@@ -51,7 +50,12 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
                    :lock        => {:passwd => resource[:lock_auth],
                                     :opt => 'l'}
                   }
-    @to_opts.map { |k, v| passwd_options(current[k], desired[k], v) }
+   options =  @to_opts.map { |k, v| passwd_options(current[k], desired[k], v) }
+   options << "-X" if resource[:in_hex]
+   debug "tpm2 password options are #{options}"
+
+   options
+
   end
 
 
@@ -63,7 +67,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
       options << [ "-#{value[:opt]}".upcase, value[:passwd]]
       # If the auth is set and we don't want to clear it then you have to give it the password
       #  to set the password or the command will fail.
-      if desired.nil? || desired == :set 
+      if desired.nil? || desired == :set
 
         options <<  ["-#{value[:opt]}", value[:passwd]]
       end
@@ -89,15 +93,17 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
   end
 
   def clear_ownership(current)
-    options << "-c"
+    options = [ "-c"]
     # Check if lockAuth is set and pass in the password to the
     # options if it is.
     if current[:lock] == :set
+
       return "Cannot clear the authorization on tpm.  Lock auth is set but no password was supplied" if resource[:lock_auth].nil?
       options << ["-L","#{resource[:lock_auth]}"]
+      options << "-X" if resource[:in_hex]
     end
     begin
-      tpm2_takeownership(get_extra_args, options)
+      tpm2_takeownership(options)
       return
     rescue Puppet::ExecutionFailure => e
       warn("tpm2_takeownership failed with error -> #{e.inspect}")
@@ -105,71 +111,35 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     end
   end
 
-  def status(x)
-    @current_status || @current_status = get_status
-    @current_status[x]
-  end
-
   # Check and see if the data file exists for the tpm.  In version 2 you can
   # use tpm2_dump_capability to check what passwords are set.
-  def get_tpm_status
-    begin
-      yaml = tpm2_getcap(get_extra_args, '-c', 'properties-variable')
-      properties_variable = YAML.safe_load(yaml)
-    rescue
-      fail("Failed to retrieve data from tpm2_getcap ")
-    end
-
-    unless properties_variable.instance_of?(Hash) && properties_variable.has_key?('TPM_PT_PERSISTENT')
-      fail("tpm2_getcap did not return 'TPM_PT_PERSISTENT' data.")
-    end
-
-    status = Hash.new
-
-    properties_variable['TPM_PT_PERSISTENT'].each { |k,v|
-      case k
-      when 'ownerAuthSet'
-         status[:owner] = v.to_sym
-      when 'endorsementAuthSet'
-        status[:endorsement] = v.to_sym
-      when 'lockoutAuthSet'
-         status[:lock] = v.to_sym
-      else
-          status[k] = v.to_sym
-      end
-    }
-    status
-  end
 
   def owner
-    status(:owner)
+    Facter.value(:tpm2)['tpm2_getcap']['properties-variable']['TPM_PT_PERSISTENT']['ownerAuthSet']
   end
 
   def lock
-    status(:lock)
+    Facter.value(:tpm2)['tpm2_getcap']['properties-variable']['TPM_PT_PERSISTENT']['lockAuthSet']
   end
 
   def endorsement
-    status(:endorsement)
+    Facter.value(:tpm2)['tpm2_getcap']['properties-variable']['TPM_PT_PERSISTENT']['endorsementAuthSet']
   end
 
   def owner=(should)
-    debug 'tpm2: Setting  owner property_flush to should'
     @property_flush[:owner] = should
   end
 
   def endorsement=(should)
-    debug 'tpm2: Setting endorsement property_flush to should'
     @property_flush[:endorsement] = should
   end
 
   def lock=(should)
-    debug 'tpm2: Setting lock property_flush to should'
     @property_flush[:lock] = should
   end
 
   def flush
-    current = @current_status
+    current = { :owner => resource[:owner].to_sym, :lock => resource[:lock].to_sym, :endorsement => resource[:endorsement].to_sym }
     desired = @property_flush
     debug 'tpm2: Flushing tpm2_ownership'
     # Check if there is something to do and while you are at it check if they
