@@ -29,86 +29,107 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
     'reserved2' => :clear,
   }}
 
-  let(:resource) {
-    Puppet::Type.type(:tpm2_ownership).new({
-      :name         => 'tpm2',
-      :owner_auth   => 'ownerpassword',
-      :lock_auth    => 'lockpassword',
-      :endorse_auth => 'endorsepassword',
-      :owner        => 'set',
-      :lock         => 'set',
-      :endorsement  => 'set',
-      :provider     => 'tpm2tools'
-    })
-  }
 
   let(:provider) { resource.provider }
-
+  let (:resource) {
+    Puppet::Type.type(:tpm2_ownership).new({
+    :name         => 'tpm2',
+    :owner        => 'clear',
+    :lock         => 'clear',
+    :endorsement  => 'clear',
+    :provider     => 'tpm2tools'
+    })}
 
   describe 'get_password_options' do
     context 'first set' do
+      let (:resource) {
+        Puppet::Type.type(:tpm2_ownership).new({
+        :name         => 'tpm2',
+        :owner_auth   => 'ownerpassword',
+        :lock_auth    => 'lockpassword',
+        :endorse_auth => 'endorsepassword',
+        :owner        => 'set',
+        :lock         => 'set',
+        :endorsement  => 'clear',
+        :provider     => 'tpm2tools'
+        })}
+
       let (:current1) {{
         :owner => :clear,
         :endorsement => :clear,
         :lock => :clear,
       }}
-      let (:desired1) {{
-        :owner => :set,
-        :endorsement => :set,
-        :lock => :set,
-      }}
-      let (:facts) {{
-        :tpm2 => {'tpm2_getcap' => { 'properties-variable' => all_clear}, 'auth_status' => true }
-      }}
-      it 'should return lower case options for all passwords' do
-#        Facter.clear
-#        allow(Facter).to receive(:fact).with(:tpm2).and_return(Facter.add(:tpm2) {setcode {{'tpm2_getcap' => { 'properties-variable' => all_clear}, 'auth_status' => true }}})
-        resource = Puppet::Type.type(:tpm2_ownership).new({
-          :name         => 'tpm2',
-          :owner_auth   => 'ownerpassword',
-          :lock_auth    => 'lockpassword',
-          :endorse_auth => 'endorsepassword',
-          :owner        => 'set',
-          :lock         => 'set',
-          :endorsement  => 'set',
-          :provider     => 'tpm2tools'
-        })
-        provider = resource.provider
-        passwd_args = provider.get_passwd_options(current1,desired1)
-        expect(passwd_args).to eq([['-o','ownerpassword'],['-e','endorsepassword'],['-l','lockpassword']])
+      it 'should return lower case options for all but endorsement' do
+        allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
+        passwd_args = provider.get_passwd_options(current1,resource)
+        expect(passwd_args).to eq(['-o','ownerpassword','-l','lockpassword'])
       end
     end
     context 'second set' do
       # If current = set and desired = set then you must clear it and set it, hence ['-O','ownerpassword','-o','ownerpassword']
       # If current = clear and desired = set then you need to set it, hence ['-e','endorsepassword']
       # if current = set and desired = clear then you need to clear it, hence ['-L','lockpassword']
+      let (:resource) {
+        Puppet::Type.type(:tpm2_ownership).new({
+        :name         => 'tpm2',
+        :owner_auth   => 'ownerpassword',
+        :lock_auth    => 'lockpassword',
+        :endorse_auth => 'endorsepassword',
+        :owner        => 'set',
+        :lock         => 'clear',
+        :endorsement  => 'set',
+        :in_hex       => 'true',
+        :provider     => 'tpm2tools'
+        })}
+
       let (:current2) {{
         :owner => :set,
         :endorsement => :clear,
         :lock => :set,
       }}
-      let (:desired2) {{
+      it 'should return set for all passwords' do
+        provider = resource.provider
+        passwd_args = provider.get_passwd_options(current2,resource)
+        expect(passwd_args).to eq(['-O','ownerpassword','-o','ownerpassword','-e','endorsepassword','-L','lockpassword', '-X'])
+      end
+    end
+  end
+  describe 'get_clear_ownership_options' do
+    let (:resource) {
+      Puppet::Type.type(:tpm2_ownership).new({
+      :name         => 'tpm2',
+      :owner_auth   => 'ownerpassword',
+      :lock_auth    => 'lockpassword',
+      :endorse_auth => 'endorsepassword',
+      :owner        => 'clear',
+      :lock         => 'clear',
+      :endorsement  => 'clear',
+      :provider     => 'tpm2tools'
+      })}
+
+    context 'clear when lock password is not set' do
+      let (:current) {{
         :owner => :set,
         :endorsement => :set,
         :lock => :clear,
       }}
-      it 'should return set for all passwords' do
-        allow(Facter).to receive(:value).with(:tpm2).and_return({'tpm2_getcap' => { 'properties-variable' => mixed }, 'auth_status' => true })
-        resource =  Puppet::Type.type(:tpm2_ownership).new({
-          :name         => 'tpm2',
-          :owner_auth   => 'ownerpassword',
-          :lock_auth    => 'lockpassword',
-          :endorse_auth => 'endorsepassword',
-          :owner        => 'set',
-          :lock         => 'clear',
-          :endorsement  => 'set',
-          :provider     => 'tpm2tools'
-        })
-        provider = resource.provider
-        passwd_args = provider.get_passwd_options(current2,desired2)
-        expect(passwd_args).to eq([['-O','ownerpassword','-o','ownerpassword'],['-e','endorsepassword'],['-L','lockpassword']])
+      it 'should return -c' do
+        allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
+        passwd_args = provider.get_clear_ownership_options(current)
+        expect(passwd_args).to eq(['-c'])
+      end
+    end
+    context 'clear when lock password is set' do
+      let (:current) {{
+        :owner => :set,
+        :endorsement => :set,
+        :lock => :set,
+      }}
+      it 'should return -c with lock auth password' do
+        allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
+        passwd_args = provider.get_clear_ownership_options(current)
+        expect(passwd_args).to eq(['-c', '-L', 'lockpassword'])
       end
     end
   end
-
 end

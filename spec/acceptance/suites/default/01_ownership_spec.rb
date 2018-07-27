@@ -13,7 +13,6 @@ describe 'tpm2 class' do
       include 'tpm2'
 
       class { 'tpm2::ownership':
-        allauth      => 'set',
         owner        => 'set',
         endorsement  => 'set',
         lock         => 'set',

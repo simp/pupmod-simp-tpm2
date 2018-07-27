@@ -1,4 +1,3 @@
-require 'puppetlabs_spec_helper/module_spec_helper'
 require 'rspec-puppet'
 require 'simp/rspec-puppet-facts'
 include Simp::RspecPuppetFacts
@@ -119,6 +118,7 @@ RSpec.configure do |c|
   end
 end
 
+require 'puppetlabs_spec_helper/module_spec_helper'
 Dir.glob("#{RSpec.configuration.module_path}/*").each do |dir|
   begin
     Pathname.new(dir).realpath
