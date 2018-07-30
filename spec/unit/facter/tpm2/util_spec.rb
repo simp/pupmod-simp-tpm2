@@ -85,22 +85,7 @@ describe Facter::TPM2::Util do
           expect(fact['firmware_version']).to match(/^\d+\.\d+\.\d+\.\d+$/)
           expect(fact['tpm2_getcap']['properties-fixed']).to be_a(Hash)
           expect(fact['tpm2_getcap']['properties-fixed']['TPM_PT_FAMILY_INDICATOR']['as string']).to eql '2.0'
-          expect(fact['auth_status']).to be(true)
         end
-      end
-      it 'should return false for auth_status if data is not there' do
-        yaml_string = File.read(File.expand_path('../../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt7xx-lag019.yaml', __FILE__) )
-        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-variable").and_return('nodata:  nostuff')
-
-        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-fixed").and_return(yaml_string)
-        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return(false)
-        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_pcrlist -s").and_return(
-          "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
-        )
-        allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( true )
-        util = Facter::TPM2::Util.new
-        fact = util.build_structured_fact
-        expect(fact['auth_status']).to be(false)
       end
     end
   end

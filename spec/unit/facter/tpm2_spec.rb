@@ -35,6 +35,12 @@ describe 'tpm2', :type => :fact do
           __FILE__,
         )
       )
+      allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-variable").and_return(
+      File.read File.expand_path(
+          '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml',
+          __FILE__,
+        )
+      )
       allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_pcrlist -s").and_return(
           "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
         )
@@ -43,6 +49,7 @@ describe 'tpm2', :type => :fact do
       expect(fact['manufacturer']).to match(/.{0,4}/)
       expect(fact['firmware_version']).to match(/^\d+\.\d+\.\d+\.\d+$/)
       expect(fact['tpm2_getcap']['properties-fixed']).to be_a(Hash)
+      expect(fact['tpm2_getcap']['properties-variable']).to be_a(Hash)
     end
   end
 end

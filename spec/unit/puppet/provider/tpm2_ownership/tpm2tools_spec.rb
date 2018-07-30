@@ -5,6 +5,9 @@ require 'facter'
 
 describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
 
+  before(:each) do
+  end
+
 
 
   let(:all_clear) {
@@ -61,6 +64,7 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
       }}
       it 'should return lower case options for all but endorsement' do
         allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
+        provider = resource.provider
         passwd_args = provider.get_passwd_options(current1,resource)
         expect(passwd_args).to eq(['-o','ownerpassword','-l','lockpassword'])
       end
@@ -88,47 +92,35 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
         :lock => :set,
       }}
       it 'should return set for all passwords' do
+        allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
         provider = resource.provider
         passwd_args = provider.get_passwd_options(current2,resource)
         expect(passwd_args).to eq(['-O','ownerpassword','-o','ownerpassword','-e','endorsepassword','-L','lockpassword', '-X'])
       end
     end
-  end
-  describe 'get_clear_ownership_options' do
-    let (:resource) {
-      Puppet::Type.type(:tpm2_ownership).new({
-      :name         => 'tpm2',
-      :owner_auth   => 'ownerpassword',
-      :lock_auth    => 'lockpassword',
-      :endorse_auth => 'endorsepassword',
-      :owner        => 'clear',
-      :lock         => 'clear',
-      :endorsement  => 'clear',
-      :provider     => 'tpm2tools'
+    context 'clear when lock password is not set' do
+      let (:resource) {
+        Puppet::Type.type(:tpm2_ownership).new({
+        :name         => 'tpm2',
+        :owner_auth   => 'ownerpassword',
+        :lock_auth    => 'lockpassword',
+        :endorse_auth => 'endorsepassword',
+        :owner        => 'clear',
+        :lock         => 'clear',
+        :endorsement  => 'clear',
+        :provider     => 'tpm2tools'
       })}
 
-    context 'clear when lock password is not set' do
       let (:current) {{
         :owner => :set,
         :endorsement => :set,
         :lock => :clear,
       }}
-      it 'should return -c' do
+      it 'should return not contain -L or -l options' do
         allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
-        passwd_args = provider.get_clear_ownership_options(current)
-        expect(passwd_args).to eq(['-c'])
-      end
-    end
-    context 'clear when lock password is set' do
-      let (:current) {{
-        :owner => :set,
-        :endorsement => :set,
-        :lock => :set,
-      }}
-      it 'should return -c with lock auth password' do
-        allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
-        passwd_args = provider.get_clear_ownership_options(current)
-        expect(passwd_args).to eq(['-c', '-L', 'lockpassword'])
+        provider = resource.provider
+        passwd_args = provider.get_passwd_options(current,resource)
+        expect(passwd_args).to eq(['-O', 'ownerpassword','-E','endorsepassword'])
       end
     end
   end

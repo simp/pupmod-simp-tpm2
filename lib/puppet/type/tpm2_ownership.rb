@@ -27,7 +27,7 @@ Example:
 
   include 'tpm'
 
-  tpm2_ownership { 'tpm0':
+  tpm2_ownership { 'tpm2':
     owner        =>  set,
     lock         =>  set,
     endorsement  =>  set,
@@ -39,6 +39,19 @@ Example:
 
   feature :take_ownership, "The ability to take ownership of a TPM"
 
+  newparam(:name, :namevar => true) do
+    desc 'A static name assigned to this type. You can only declare
+          this type of resource once in your node scope'
+
+    isnamevar
+
+    defaultto 'tpm2'
+
+    validate do |value|
+      raise(ArgumentError,"Error: $name must be 'tpm2'.") unless value == 'tpm2'
+    end
+
+  end
 
   newparam(:owner_auth) do
     desc 'The owner password of the TPM'
@@ -70,10 +83,6 @@ Example:
     defaultto ''
   end
 
-  newparam(:name, :namevar => true) do
-    desc 'The name of the resource has no impact.'
-    defaultto 'tpm2'
-  end
 
   newparam(:in_hex, :boolean => true, :parent => Puppet::Parameter::Boolean) do
     desc "Whether or not the passwords are in hex"
@@ -99,7 +108,6 @@ Example:
     desc ' Seting for owner authorization'
     newvalues(:clear, :set)
   end
-
 
   #Global Validation
    validate do

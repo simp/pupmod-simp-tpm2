@@ -17,6 +17,7 @@ class tpm2::ownership(
     endorse_auth => $endorse_auth,
     lock_auth    => $lock_auth,
     in_hex       => $in_hex,
+    require      => Service["${::tpm2::tabrm_service}"]
   }
 
 }

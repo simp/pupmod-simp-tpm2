@@ -18,6 +18,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     @property_current = {}
   end
 
+
   def get_passwd_options(current, desired)
     to_opts    = {:owner       => {:passwd => resource[:owner_auth],
                                     :opt => 'o'},
@@ -38,9 +39,10 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     case current
     when :set
       fail("The current state is set and password is not provided.  The password must be provided even if a change is not required") if value[:passwd].empty?
+      # If the current state is set then you need to pass the password in with upper case option.
       options << [ "-#{value[:opt]}".upcase, value[:passwd]]
       # If the auth is set and we don't want to clear it then you have to give it the password
-      #  to set the password or the command will fail.
+      #  to set the password or it will clear the password.
       if desired.nil? || desired == :set
 
         options <<  ["-#{value[:opt]}", value[:passwd]]
@@ -49,23 +51,12 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
       if desired == :set
         options << [ "-#{value[:opt]}", value[:passwd]]
       end
-    else
-      return
-
     end
     options.flatten
   end
 
   def take_ownership(current, desired)
-    clear_all = true
-    desired.keys.each { |x|
-      desired[x] == :clear || clear_all = false
-    }
-    if clear_all
-      params = get_clear_ownership_options(current)
-    else
-      params = get_passwd_options(current,desired)
-    end
+    params = get_passwd_options(current,desired)
     debug "calling tpm2_takeownership with parameters: #{params}"
     begin
       tpm2_takeownership(params)
@@ -74,18 +65,6 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
       warn("tpm2_takeownership failed with error -> #{e.inspect}")
       return e
     end
-  end
-
-  def get_clear_ownership_options(current)
-    options = [ "-c"]
-    # Check if lockAuth is set and pass in the password to the
-    # options if it is.
-    if current[:lock] == :set
-      return "Cannot clear the authorization on tpm.  Lock auth is set but no password was supplied" if resource[:lock_auth].nil?
-      options << ["-L","#{resource[:lock_auth]}"]
-      options << "-X" if resource[:in_hex]
-    end
-    options.flatten
   end
 
   # Check and see if the data file exists for the tpm.  In version 2 you can
@@ -134,11 +113,15 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
   end
 
   def flush
+    #verify that the current state is known.  If not we don't want to try
+    #tpm2_takeownership because you could lockout the TPM.
     [ :owner, :lock, :endorsement ].each  { |x|
       if @property_current[x] == :unknown
         Puppet.warning("The status of the tpm authorization values are unknown.  Puppet will not attempt to change ownership.")
         return
       end
+      # The setter will only set a value for @property_flush if it is changing.
+      @property_flush[x] = resource[x]
     }
     debug "Starting to process take_ownership with current state: #{@property_current} and desired state: #{@property_flush}"
     output = take_ownership(@property_current, @property_flush)

@@ -1,14 +1,13 @@
-
 require 'spec_helper_acceptance'
 require 'yaml'
 
 RUN_IN_PARALLEL = ENV.fetch('BEAKER_RUN_IN_PARALLEL', '')
                      .split(',').include?('tests')
+test_name 'tpm2::ownership class'
 
-test_name 'tpm2 class'
+describe 'tpm2::ownership class' do
 
-describe 'tpm2 class' do
-  let(:manifest) do
+  let(:set_manifest) do
     <<-MANIFEST
       include 'tpm2'
 
@@ -18,44 +17,100 @@ describe 'tpm2 class' do
         lock         => 'set',
         owner_auth   => 'Myownerpassword',
         lock_auth    => 'Mylockpassword',
-        endorse_auth => 'Myendorsepassword'
+        endorse_auth => 'Myendorsepassword',
+        require      => Service['tpm2-abrmd'],
       }
 
     MANIFEST
   end
+  let(:clear_manifest) do
+    <<-MANIFEST
+      include 'tpm2'
+      class { 'tpm2::ownership':
+        owner        => 'clear',
+        endorsement  => 'clear',
+        lock         => 'clear',
+        owner_auth   => 'Myownerpassword',
+        lock_auth    => 'Mylockpassword',
+        endorse_auth => 'Myendorsepassword',
+        require      => Service['tpm2-abrmd'],
+      }
 
-  context 'with default settings' do
-    it 'should apply with no errors' do
-      #      on( hosts, 'yum install -y tmux htop vim-enhanced net-tools ' + \
-      #        'setools-console setroubleshoot checkpolicy ' + \
-      #        'policycoreutils-devel mlocate man-pages')
-      #      on( hosts, 'updatedb')
-      apply_manifest_on(hosts, manifest, run_in_parallel: RUN_IN_PARALLEL)
-      apply_manifest_on(
-        hosts, manifest,
-        catch_failures: true,
-        run_in_parallel: RUN_IN_PARALLEL
-      )
+    MANIFEST
+  end
+  let(:owner_only) do
+    <<-MANIFEST
+      include 'tpm2'
+      class { 'tpm2::ownership':
+        owner        => 'set',
+        endorsement  => 'clear',
+        lock         => 'set',
+        owner_auth   => 'Myownerpassword',
+        lock_auth    => 'Mylockpassword',
+        require      => Service['tpm2-abrmd'],
+      }
+
+    MANIFEST
+  end
+  let(:clear_owner_only) do
+    <<-MANIFEST
+      include 'tpm2'
+      class { 'tpm2::ownership':
+        owner        => 'clear',
+        endorsement  => 'clear',
+        lock         => 'set',
+        owner_auth   => 'Myownerpassword',
+        lock_auth    => 'Mylockpassword',
+        require      => Service['tpm2-abrmd'],
+    }
+
+    MANIFEST
+  end
+
+  context 'applying tpm2::ownership with various settings' do
+    it 'the test installs tpm without errors' do
+      apply_manifest_on(hosts, 'include tpm2', catch_failures: true)
+      apply_manifest_on( hosts, 'include tpm2', catch_failures: true)
     end
 
-    it 'should be idempotent' do
-      sleep 20
-      apply_manifest_on(
-        hosts, manifest,
-        catch_changes: true,
-        run_in_parallel: RUN_IN_PARALLEL
-      )
+    it 'should take ownership of all three sections and idempotent' do
+      #Note: applying it twice to make sure the fact is updated.
+      hosts.entries.each do |host|
+        sleep 20
+        apply_manifest_on( host, set_manifest, catch_failures: true)
+        apply_manifest_on( host, set_manifest, catch_changes: true)
+        expect(get_tpm2_status(host)).to eq(['set','set','set'])
+      end
     end
 
-#    it 'should query tpm2 information with facter' do
-#      hosts.entries.each do |host|
-#        stdout = on(host, 'facter -p -y tpm2 --strict').stdout
-#        fact = YAML.safe_load(stdout)['tpm2']
-#        expect{ fact['tpm2_getcap'].to be_a Hash }
-#        expect{ fact['tpm2_getcap']['properties-fixed'].to be_a Hash }
-#        expect{ fact['tpm2_getcap']['properties-fixed']['TPM_PT_FAMILY_INDICATOR']['as string'].to eq '2.0' }
-#        expect{ fact['manufacturer'].to eq 'IBM ' }
-#      end
-#    end
+    it 'should clear the auth on tpm and be idempotent' do
+      #Note: applying it twice to make sure the fact is updated.
+      hosts.entries.each do |host|
+        sleep 20
+        apply_manifest_on( host, clear_manifest, catch_failures: true)
+        apply_manifest_on( host, clear_manifest, catch_changes: true)
+        expect(get_tpm2_status(host)).to eq(['clear','clear','clear'])
+      end
+    end
+    it 'should set owner and lock and be idempotent' do
+      #Note: applying it twice to make sure the fact is updated.
+      hosts.entries.each do |host|
+        sleep 20
+        apply_manifest_on( host, owner_only, catch_failures: true)
+        apply_manifest_on( host, owner_only, catch_changes: true)
+        expect(get_tpm2_status(host)).to eq(['set','clear','set'])
+      end
+    end
+
+    it 'should clear owner and leave lock and be idempotent' do
+      #Note: applying it twice to make sure the fact is updated.
+      hosts.entries.each do |host|
+        sleep 20
+        apply_manifest_on( host, clear_owner_only, catch_failures: true)
+        get_tpm2_status(host)
+        apply_manifest_on( host, clear_owner_only, catch_changes: true)
+        expect(get_tpm2_status(host)).to eq(['clear','clear','set'])
+      end
+    end
   end
 end

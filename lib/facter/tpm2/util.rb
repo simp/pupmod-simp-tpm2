@@ -82,8 +82,6 @@ class Facter::TPM2::Util
                               fixed_props['TPM_PT_FIRMWARE_VERSION_1'],
                               fixed_props['TPM_PT_FIRMWARE_VERSION_2']
                             ),
-      'auth_status'      => variable_props.has_key?('TPM_PT_PERSISTENT'),
-
       'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
     }
   end
