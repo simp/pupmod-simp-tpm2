@@ -22,9 +22,9 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
   def get_passwd_options(current, desired)
     to_opts    = {:owner       => {:passwd => resource[:owner_auth],
                                     :opt => 'o'},
-                   :endorsement => {:passwd => resource[:endorse_auth],
+                  :endorsement => {:passwd => resource[:endorsement_auth],
                                     :opt => 'e'},
-                   :lock        => {:passwd => resource[:lock_auth],
+                  :lockout     => {:passwd => resource[:lockout_auth],
                                     :opt => 'l'}
                   }
    options =  to_opts.map { |k, v| passwd_options(current[k], desired[k], v) }
@@ -80,14 +80,14 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     @property_current[:owner]
   end
 
-  def lock
+  def lockout
     value = Facter.value(:tpm2)['tpm2_getcap']['properties-variable']['TPM_PT_PERSISTENT']['lockoutAuthSet']
     if value.nil?
-      @property_current[:lock] = :unknown
+      @property_current[:lockout] = :unknown
     else
-      @property_current[:lock] = value.to_sym
+      @property_current[:lockout] = value.to_sym
     end
-    @property_current[:lock]
+    @property_current[:lockout]
   end
 
   def endorsement
@@ -108,14 +108,14 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
     @property_flush[:endorsement] = should
   end
 
-  def lock=(should)
-    @property_flush[:lock] = should
+  def lockout=(should)
+    @property_flush[:lockout] = should
   end
 
   def flush
     #verify that the current state is known.  If not we don't want to try
     #tpm2_takeownership because you could lockout the TPM.
-    [ :owner, :lock, :endorsement ].each  { |x|
+    [ :owner, :lockout, :endorsement ].each  { |x|
       if @property_current[x] == :unknown
         Puppet.warning("The status of the tpm authorization values are unknown.  Puppet will not attempt to change ownership.")
         return

@@ -3,12 +3,7 @@ require 'json'
 require 'yaml'
 require 'facter'
 
-describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
-
-  before(:each) do
-  end
-
-
+describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools)' do
 
   let(:all_clear) {
     YAML.safe_load(File.read(File.expand_path('spec/files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml')))
@@ -22,23 +17,23 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
     YAML.safe_load(File.read(File.expand_path('spec/files/tpm2/mocks/tpm2_getcap_-c_properties-variable/set-set-clear.yaml')))
   }
   let (:expected_hash1) {{
-    :owner => :clear,
-    :endorsement => :clear,
-    :lock => :clear,
-    'reserved1' => :clear,
-    'disableClear' => :clear,
-    'inLockout' => :clear,
+    :owner            => :clear,
+    :endorsement      => :clear,
+    :lockout          => :clear,
+    'reserved1'       => :clear,
+    'disableClear'    => :clear,
+    'inLockout'       => :clear,
     'tpmGeneratedEPS' => :set,
-    'reserved2' => :clear,
+    'reserved2'       => :clear,
   }}
 
 
-  let(:provider) { resource.provider }
+  let (:provider) { resource.provider }
   let (:resource) {
     Puppet::Type.type(:tpm2_ownership).new({
     :name         => 'tpm2',
     :owner        => 'clear',
-    :lock         => 'clear',
+    :lockout      => 'clear',
     :endorsement  => 'clear',
     :provider     => 'tpm2tools'
     })}
@@ -47,20 +42,20 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
     context 'first set' do
       let (:resource) {
         Puppet::Type.type(:tpm2_ownership).new({
-        :name         => 'tpm2',
-        :owner_auth   => 'ownerpassword',
-        :lock_auth    => 'lockpassword',
-        :endorse_auth => 'endorsepassword',
-        :owner        => 'set',
-        :lock         => 'set',
-        :endorsement  => 'clear',
-        :provider     => 'tpm2tools'
+        :name             => 'tpm2',
+        :owner_auth       => 'ownerpassword',
+        :lockout_auth     => 'lockpassword',
+        :endorsement_auth => 'endorsepassword',
+        :owner            => 'set',
+        :lockout          => 'set',
+        :endorsement      => 'clear',
+        :provider         => 'tpm2tools'
         })}
 
       let (:current1) {{
-        :owner => :clear,
+        :owner       => :clear,
         :endorsement => :clear,
-        :lock => :clear,
+        :lockout     => :clear,
       }}
       it 'should return lower case options for all but endorsement' do
         allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
@@ -75,21 +70,21 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
       # if current = set and desired = clear then you need to clear it, hence ['-L','lockpassword']
       let (:resource) {
         Puppet::Type.type(:tpm2_ownership).new({
-        :name         => 'tpm2',
-        :owner_auth   => 'ownerpassword',
-        :lock_auth    => 'lockpassword',
-        :endorse_auth => 'endorsepassword',
-        :owner        => 'set',
-        :lock         => 'clear',
-        :endorsement  => 'set',
-        :in_hex       => 'true',
-        :provider     => 'tpm2tools'
+        :name             => 'tpm2',
+        :owner_auth       => 'ownerpassword',
+        :lockout_auth     => 'lockpassword',
+        :endorsement_auth => 'endorsepassword',
+        :owner            => 'set',
+        :lockout          => 'clear',
+        :endorsement      => 'set',
+        :in_hex           => 'true',
+        :provider         => 'tpm2tools'
         })}
 
       let (:current2) {{
-        :owner => :set,
+        :owner       => :set,
         :endorsement => :clear,
-        :lock => :set,
+        :lockout     => :set,
       }}
       it 'should return set for all passwords' do
         allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)
@@ -98,23 +93,23 @@ describe Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools) do
         expect(passwd_args).to eq(['-O','ownerpassword','-o','ownerpassword','-e','endorsepassword','-L','lockpassword', '-X'])
       end
     end
-    context 'clear when lock password is not set' do
+    context 'clear when lockout password is not set' do
       let (:resource) {
         Puppet::Type.type(:tpm2_ownership).new({
-        :name         => 'tpm2',
-        :owner_auth   => 'ownerpassword',
-        :lock_auth    => 'lockpassword',
-        :endorse_auth => 'endorsepassword',
-        :owner        => 'clear',
-        :lock         => 'clear',
-        :endorsement  => 'clear',
-        :provider     => 'tpm2tools'
+        :name             => 'tpm2',
+        :owner_auth       => 'ownerpassword',
+        :lockout_auth     => 'lockpassword',
+        :endorsement_auth => 'endorsepassword',
+        :owner            => 'clear',
+        :lockout          => 'clear',
+        :endorsement      => 'clear',
+        :provider         => 'tpm2tools'
       })}
 
       let (:current) {{
-        :owner => :set,
+        :owner       => :set,
         :endorsement => :set,
-        :lock => :clear,
+        :lockout     => :clear,
       }}
       it 'should return not contain -L or -l options' do
         allow(Facter).to receive(:value).with(:kernel).and_return(:Linux)

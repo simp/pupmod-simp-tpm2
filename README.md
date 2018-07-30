@@ -61,22 +61,40 @@ include 'tpm2'
 
 ## Usage
 
-**FIXME:** Ensure the *Usage* section is correct and complete, then remove this message!
+To set the authentication passwords on the system:
 
-This section is where you describe how to customize, configure, and do the
-fancy stuff with your module here. It's especially helpful if you include usage
-examples and code samples for doing things with your module.
+Include the tpm module and set the following in hiera:
 
-## Reference
+Note: You must indicate the desired status of all three authentications settings.
+They can be either 'set' or 'clear'.
 
-See [REFERENCE.md](REFERENCE.md) for API documentation.
+tpm2::take_ownership: true
+tpm2::ownership::owner: set
+tpm2::ownership::lock:  set
+tpm2::ownership::endorsement: set
+
+The passwords will default to automatically generated passwords using passgen.  If
+you want to set them to specific passwords then set them in hiera using the 
+following settings (it expects a minumum password length of 14 charaters):
+
+tpm2::ownership::owner_auth: 'MyOwnerPassword'
+tpm2::ownership::lock_auth:  'MyLockPassword'
+tpm2::ownership::endorse_autt: 'MyEndorsePassword'
 
 ## Limitations
+
+The tpm2_takeownership module cannot be used to change the current password. It would
+continually try to reset the password and would lock out the TPM.  It should be used
+to initialized or clear the TPM only.
 
 SIMP Puppet modules are generally intended for use on Red Hat Enterprise Linux
 and compatible distributions, such as CentOS. Please see the
 [`metadata.json` file](./metadata.json) for the most up-to-date list of
 supported operating systems, Puppet versions, and module dependencies.
+
+## Reference
+
+See [REFERENCE.md](REFERENCE.md) for API documentation.
 
 ## Development
 

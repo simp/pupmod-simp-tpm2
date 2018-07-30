@@ -1,8 +1,8 @@
 # The tpm_ownership type allows you to take ownership of tpm0.
 #
 # @!puppet.type.param owner_auth TPM owner password. Required.
-# @!puppet.type.param lock_auth TPM  lock out password. Required.
-# @!puppet.type.param endorse_auth TPM endorsement hierachy password. Required.
+# @!puppet.type.param lockout_auth TPM  lock out password. Required.
+# @!puppet.type.param endorsement_auth TPM endorsement hierachy password. Required.
 #
 # @!puppet.type.param in_hex If true, indicates the passwords are in Hex.
 #
@@ -29,11 +29,11 @@ Example:
 
   tpm2_ownership { 'tpm2':
     owner        =>  set,
-    lock         =>  set,
+    lockout      =>  set,
     endorsement  =>  set,
     owner_auth   => 'badpass',
-    lock_auth    => 'badpass',
-    endorse_auth => 'badpass',
+    lockout_auth => 'badpass',
+    endorsement_auth => 'badpass',
   }
 "
 
@@ -63,21 +63,21 @@ Example:
     defaultto ''
   end
 
-  newparam(:lock_auth) do
+  newparam(:lockout_auth) do
     desc "The lock out password of the TPM"
     validate do |value|
       unless value.is_a?(String)
-        raise(Puppet::Error, "lock_auth must be a String, not '#{value.class}'")
+        raise(Puppet::Error, "lockout_auth must be a String, not '#{value.class}'")
       end
     end
     defaultto ''
   end
 
-  newparam(:endorse_auth) do
+  newparam(:endorsement_auth) do
     desc "The endorse password of the TPM"
     validate do |value|
       unless value.is_a?(String)
-        raise(Puppet::Error, "endorse_auth must be a String, not '#{value.class}'")
+        raise(Puppet::Error, "endorsement_auth must be a String, not '#{value.class}'")
       end
     end
     defaultto ''
@@ -104,7 +104,7 @@ Example:
     newvalues(:clear, :set)
   end
 
-  newproperty(:lock) do
+  newproperty(:lockout) do
     desc ' Seting for owner authorization'
     newvalues(:clear, :set)
   end
@@ -112,7 +112,7 @@ Example:
   #Global Validation
    validate do
 
-     [[:owner,:owner_auth],[:lock,:lock_auth],[:endorsement, :endorse_auth]].each { |x,y|
+     [[:owner,:owner_auth],[:lockout,:lockout_auth],[:endorsement, :endorsement_auth]].each { |x,y|
        if self[x] ==  :set
          raise(Puppet::Error, "Password parameter, #{y}, must be provided when #{x} = 'set'") if self[y].empty?
        end
