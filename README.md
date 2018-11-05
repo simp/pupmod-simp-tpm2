@@ -1,4 +1,8 @@
-[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-tpm2.svg)](https://travis-ci.org/simp/pupmod-simp-tpm2) [![SIMP compatibility](https://img.shields.io/badge/SIMP%20compatibility-6.*-orange.svg)](https://img.shields.io/badge/SIMP%20compatibility-6.*-orange.svg)
+[![License](https://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/73/badge)](https://bestpractices.coreinfrastructure.org/projects/73)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/simp/tpm2.svg)](https://forge.puppetlabs.com/simp/tpm2)
+[![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/simp/tpm2.svg)](https://forge.puppetlabs.com/simp/tpm2)
+[![Build Status](https://travis-ci.org/simp/pupmod-simp-tpm2.svg)](https://travis-ci.org/simp/pupmod-simp-tpm2)
 
 #### Table of Contents
 
