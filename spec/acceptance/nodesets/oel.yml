@@ -11,9 +11,9 @@ HOSTS:
     roles:
       - server
       - default
-    platform:   el-7-x86_64
-    box:        centos/7
-    hypervisor: <%= hypervisor %>
+    platform:    el-7-x86_64
+    box:         onyxpoint/oel-7-x86_64
+    hypervisor:  <%= hypervisor %>
 
 CONFIG:
   log_level: verbose
@@ -27,4 +27,3 @@ CONFIG:
   puppet_collection: <%= ENV['BEAKER_PUPPET_COLLECTION'] %>
 <% end -%>
 # vb_gui: true
-

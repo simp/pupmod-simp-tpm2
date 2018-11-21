@@ -1,6 +1,6 @@
 {
   "name": "simp-tpm2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "SIMP Team",
   "summary": "Manage TPM2.0 devices",
   "license": "Apache-2.0",
@@ -31,6 +31,12 @@
     },
     {
       "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
         "7"
       ]
