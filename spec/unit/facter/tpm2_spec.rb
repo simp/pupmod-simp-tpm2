@@ -10,7 +10,7 @@ describe 'tpm2', :type => :fact do
     @u_bin = '/usr/bin'
   end
 
-  context 'when a hardware TPM is installed' do
+  context 'when the hardware TPM is TPM 1.2' do
     it 'should return nil' do
       allow(Facter).to receive(:value).with(:has_tpm).and_return true
       allow(Facter).to receive(:value).with(:tpm).and_return({ :tpm1_hash => :values })
@@ -22,21 +22,31 @@ describe 'tpm2', :type => :fact do
     end
   end
 
-  context 'The hardware TPM is TPM 2.0' do
+  context 'when tpm2-tools is not installed' do
+    it 'should return nil' do
+      allow(Facter).to receive(:value).with(:has_tpm).and_return true
+      allow(Facter).to receive(:value).with(:tpm).and_return nil
+      allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return false
+      allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return false
+
+      expect(Facter.fact(:tpm2).value).to eq nil
+    end
+  end
+
+  context 'when the hardware TPM is TPM 2.0' do
     it 'should return a fact' do
       allow(Facter).to receive(:value).with(:has_tpm).and_return true
-      allow(Facter).to receive(:value).with(:tpm).and_return( nil )
-      allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return(false)
-      allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( true )
-      allow(Facter).to receive(:value).with(:has_tpm).and_return true
+      allow(Facter).to receive(:value).with(:tpm).and_return nil
+      allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return false
+      allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return true
       allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-fixed").and_return(
-      File.read File.expand_path(
+        File.read File.expand_path(
           '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt6xx-fbfc85e.yaml',
           __FILE__,
         )
       )
       allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-variable").and_return(
-      File.read File.expand_path(
+        File.read File.expand_path(
           '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml',
           __FILE__,
         )
