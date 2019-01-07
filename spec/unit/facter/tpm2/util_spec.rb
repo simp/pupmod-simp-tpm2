@@ -24,7 +24,7 @@ describe Facter::TPM2::Util do
     end
     context "tpm2-tools are only under /usr" do
       it 'should choose the correct path' do
-        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return(false)
+        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return( false )
         allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( true )
         expect(Facter::TPM2::Util.tpm2_tools_prefix).to eq @u_bin
       end
@@ -66,7 +66,7 @@ describe Facter::TPM2::Util do
       # manufacturers/models as we can find
       it 'should return a correct data structure queried from the TPM of any manufacturer' do
         # Modeling an @base EL7 rpm install of tpm2-tools
-        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return(false)
+        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return( false )
         allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( true )
 
         variable_yaml_string = File.read(File.expand_path('../../../../files/tpm2/mocks/tpm2_getcap_-c_properties-variable/set-set-set.yaml', __FILE__) )
