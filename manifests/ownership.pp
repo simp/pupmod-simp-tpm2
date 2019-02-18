@@ -42,9 +42,9 @@ class tpm2::ownership(
   Enum['set','clear']            $owner              = 'clear',
   Enum['set','clear']            $endorsement        = 'clear',
   Enum['set','clear']            $lockout            = 'clear',
-  String[14]                     $owner_auth         = passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24}),
-  String[14]                     $lockout_auth       = passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24}),
-  String[14]                     $endorsement_auth   = passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
+  String[14]                     $owner_auth         = simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24}),
+  String[14]                     $lockout_auth       = simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24}),
+  String[14]                     $endorsement_auth   = simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
   Boolean                        $in_hex             = false,
   String                         $service_name       = $tpm2::tabrm_service
 ){
