@@ -102,7 +102,7 @@ See [REFERENCE.md](REFERENCE.md) for API documentation.
 
 ## Development
 
-Please read our [Contribution Guide](http://simp-doc.readthedocs.io/en/stable/contributors_guide/index.html).
+Please read our [Contribution Guide](https://simp.readthedocs.io/en/stable/contributors_guide/index.html).
 
 ### Acceptance tests
 
@@ -137,7 +137,7 @@ hosted at https://github.com/op-ct/simp-tpm2-rpms/releases.
 Please refer to the [SIMP Beaker Helpers documentation](https://github.com/simp/rubygem-simp-beaker-helpers/blob/master/README.md)
 for more information.
 
-[simp]: https://github.com/NationalSecurityAgency/SIMP
+[simp]: https://simp-project.com
 [simp-bug-tracker]: https://simp-project.atlassian.net/
 [tpm2-tools]: https://github.com/tpm2-software/tpm2-toolso
 [tpm2-software]: https://github.com/tpm2-software/

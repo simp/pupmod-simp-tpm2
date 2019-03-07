@@ -3,6 +3,8 @@
   for that fact evaluation
 - Use simplib::passgen() in lieu of passgen(), a deprecated simplib
   Puppet 3 function.
+- Update the upper bound of stdlib to < 6.0.0
+- Update a URL in the README.md
 
 * Wed Nov 21 2018 Adam Yohrling <adam.yohrling@onyxpoint.com> - 0.1.0
 - Added OEL support
