@@ -1,6 +1,6 @@
 {
   "name": "simp-tpm2",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "SIMP Team",
   "summary": "Manage TPM2.0 devices",
   "license": "Apache-2.0",
