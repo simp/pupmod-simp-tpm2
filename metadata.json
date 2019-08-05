@@ -1,6 +1,6 @@
 {
   "name": "simp-tpm2",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": "SIMP Team",
   "summary": "Manage TPM2.0 devices",
   "license": "Apache-2.0",
@@ -19,7 +19,7 @@
     },
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 4.13.1 < 6.0.0"
+      "version_requirement": ">= 4.13.1 < 7.0.0"
     }
   ],
   "operatingsystem_support": [
@@ -45,7 +45,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.10.4 < 6.0.0"
+      "version_requirement": ">= 5.0.0 < 7.0.0"
     }
   ]
 }
