@@ -1,6 +1,4 @@
 ---
-tpm2::tabrm_service: tpm2-abrmd
-
 tpm2::packages:
   tpm2-tools:
     ensure: package_ensure

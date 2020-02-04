@@ -15,26 +15,6 @@ unless ENV['BEAKER_provision'] == 'no'
   end
 end
 
-# Download (and unpack if tarball of) TPM2 RPMs in the rpm_staging_dir
-# supports URLs ending in *.rpm, #.tar.gz, *.tar, and *.tgz
-def download_rpm_tarball_on(hosts, rpm_staging_dir)
-  tpm2_rpms_tarball_url_string = ENV['BEAKER_tpm2_rpms_tarball_url'] || \
-    'https://github.com/op-ct/simp-tpm2-rpms/releases/download/0.1.0-rpms/simp-tpm2-simulator-1119.0.0-0.el7.centos.x86_64.rpm'
-    ### 'https://github.com/op-ct/simp-tpm2-rpms/releases/download/0.1.0/simp-tpm-rpms-0.1.0.tar.gz'
-  urls = tpm2_rpms_tarball_url_string.split(/,/)
-  urls.each do |url|
-    file = File.basename url
-    cmd  = "curl -L '#{url}' > '#{rpm_staging_dir}/#{file}'"
-
-    if file =~ /\.(tar\.gz|tgz)$/
-      cmd += " && cd '#{rpm_staging_dir}' && tar zxvf '#{file}'"
-    elsif file =~ /\.tar$/
-      cmd += " && cd '#{rpm_staging_dir}' && tar xvf '#{file}'"
-    end
-    on hosts, cmd
-  end
-end
-
 # Install all `*.rpm` files in `rpm_staging_dir/`
 def install_rpms_staged_on(hosts,rpm_staging_dir)
   on hosts, "yum localinstall -y #{rpm_staging_dir}/*.rpm"
@@ -59,20 +39,16 @@ def implement_workarounds(hosts)
 end
 
 def install_pre_suite_rpms(hosts)
-  download_rpms   = !ENV.fetch('BEAKER_download_pre_suite_rpms','yes') == 'no'
   rpm_staging_dir = "/root/rpms.#{$$}"
 
   on hosts, "mkdir -p #{rpm_staging_dir}"
-  download_rpm_tarball_on(hosts, rpm_staging_dir) unless download_rpms
   upload_locally_staged_rpms_to(hosts, rpm_staging_dir)
   install_rpms_staged_on(hosts, rpm_staging_dir)
 end
 
 # starts tpm2sim service on (hosts)
 def start_tpm2sim_on(hosts)
-  on hosts, 'runuser tpm2sim --shell /bin/sh -c ' \
-    '"cd /tmp; nohup /usr/local/bin/tpm2-simulator &> /tmp/tpm2-simulator.log &"', \
-    pty: true, run_in_parallel: true
+  on hosts, 'systemctl start simp-tpm2-simulator', pty: true, run_in_parallel: true
 end
 
 def config_abrmd_for_tpm2sim_on(hosts)

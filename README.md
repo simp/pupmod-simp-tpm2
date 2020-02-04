@@ -14,8 +14,8 @@
   * [What tpm2 affects](#what-tpm2-affects)
   * [Beginning with tpm2](#beginning-with-tpm2)
 * [Usage](#usage)
-* [Reference](#reference)
 * [Limitations](#limitations)
+* [Reference](#reference)
 * [Development](#development)
   * [Acceptance tests](#acceptance-tests)
     * [TPM2 simulator](#tpm2-simulator)
@@ -78,7 +78,7 @@ tpm2::ownership::lock:  set
 tpm2::ownership::endorsement: set
 
 The passwords will default to automatically generated passwords using passgen.  If
-you want to set them to specific passwords then set them in hiera using the 
+you want to set them to specific passwords then set them in hiera using the
 following settings (it expects a minumum password length of 14 charaters):
 
 tpm2::ownership::owner_auth: 'MyOwnerPassword'
@@ -98,7 +98,7 @@ supported operating systems, Puppet versions, and module dependencies.
 
 ## Reference
 
-See [REFERENCE.md](REFERENCE.md) for API documentation.
+See [REFERENCE.md](./REFERENCE.md) for API documentation.
 
 ## Development
 
