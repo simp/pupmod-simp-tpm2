@@ -14,9 +14,8 @@ HOSTS:
     box:        generic/oracle7
     hypervisor: <%= hypervisor %>
     yum_repos:
-      # The TPM2 simulator RPMs are currently in the unstable repositories
       simp_unstable:
-        baseurl: 'https://download.simp-project.com/simp/yum/unstable/simp6/el/$releasever/$basearch/simp/'
+        baseurl: 'https://download.simp-project.com/simp/yum/rolling/6/el/$releasever/$basearch/simp/'
         gpgcheck: 0
 
   oel8:
@@ -26,7 +25,7 @@ HOSTS:
     yum_repos:
       # The TPM2 simulator RPMs are currently in the unstable repositories
       simp_unstable:
-        baseurl: 'https://download.simp-project.com/simp/yum/unstable/simp6/el/$releasever/$basearch/simp/'
+        baseurl: 'https://download.simp-project.com/simp/yum/unstable/6/el/$releasever/$basearch/simp/'
         gpgcheck: 0
 
 CONFIG:

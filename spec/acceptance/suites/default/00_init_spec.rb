@@ -26,6 +26,12 @@ describe 'tpm2 class' do
         install_package(host, 'tpm2-abrmd')
       end
 
+      it 'should install and start the TPM2 simulator' do
+        install_package(host, 'simp-tpm2-simulator')
+
+        on(host, 'puppet resource service simp-tpm2-simulator ensure=running enable=true')
+      end
+
       # TODO: Undo this when
       # https://github.com/tpm2-software/tpm2-abrmd/pull/680/files makes it into
       # mainline
