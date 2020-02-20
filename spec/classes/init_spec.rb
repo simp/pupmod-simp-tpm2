@@ -21,9 +21,10 @@ describe 'tpm2' do
         it { is_expected.to create_service('tpm2-abrmd') }
       end
 
-      context 'with default parameters and no physical TPM', :skip => xmessage do
+      context 'with default parameters and no physical TPM' do
         let(:facts) do
           os_facts.merge({
+            :tpm => nil
           })
         end
         it { is_expected.to compile.with_all_deps }
