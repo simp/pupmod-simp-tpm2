@@ -63,5 +63,5 @@ class tpm2::ownership(
     lockout_auth     => $lockout_auth,
     in_hex           => $in_hex,
     require          => Class['tpm2::service']
-  }
+    }
 }

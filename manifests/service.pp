@@ -2,7 +2,6 @@
 class tpm2::service {
   assert_private()
 
-
   if $tpm2::tabrm_options {
     $_cmd_opts = join($tpm2::tabrm_options, ' ')
     $_override = @("OVERRIDE")
@@ -15,7 +14,7 @@ class tpm2::service {
     systemd::dropin_file { 'tabrm_service.conf':
       unit    => "${tpm2::tabrm_service}.service",
       content => $_override,
-      notify  => Service["#{$tpm2::tabrm_service}"]
+      notify  => Service[$tpm2::tabrm_service]
     }
   }
 

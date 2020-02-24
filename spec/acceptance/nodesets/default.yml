@@ -7,19 +7,34 @@
 -%>
 ---
 HOSTS:
-  el7:
+  #  el7:
+  #  roles:
+  #    - default
+  #  platform:   el-7-x86_64
+  #  box:        centos/7
+  #  hypervisor: <%= hypervisor %>
+  #  yum_repos:
+  #    # The TPM2 simulator RPMs are currently in the unstable repositories
+  #    simp_unstable:
+  #      baseurl: 'https://download.simp-project.com/simp/yum/rolling/6/el/$releasever/$basearch/simp/'
+  #      gpgcheck: 0
+
+  el8:
     roles:
       - default
-    platform:   el-7-x86_64
-    box:        centos/7
+      - tpm
+    platform:   el-8-x86_64
+    box:        centos/8
     hypervisor: <%= hypervisor %>
     yum_repos:
       # The TPM2 simulator RPMs are currently in the unstable repositories
       simp_unstable:
-        baseurl: 'https://download.simp-project.com/simp/yum/rolling/6/el/$releasever/$basearch/simp/'
+        baseurl: 'https://download.simp-project.com/simp/yum/unstable/6/el/$releasever/$basearch/simp/'
         gpgcheck: 0
 
-  el8:
+  el8notpm:
+    roles:
+      - notpm
     platform:   el-8-x86_64
     box:        centos/8
     hypervisor: <%= hypervisor %>

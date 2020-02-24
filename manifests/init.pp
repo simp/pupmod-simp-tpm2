@@ -36,7 +36,9 @@ class tpm2 (
 
   # There is no reason to install TPM2 resources on a host
   if defined('$facts["tpm_version"]') and $facts['tpm_version' == 'tpm1'] {
-    notify{ "NOTICE: Host has a tpm1 device; skipping TPM2 resources from module '${module_name}'": }
+    notify { 'tpm2_with_tpm1':
+      message => "NOTICE: Host has a tpm1 device; skipping TPM2 resources from module ${module_name}"
+    }
   } else {
     include 'tpm2::install'
     include 'tpm2::service'
