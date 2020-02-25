@@ -21,7 +21,7 @@ describe 'tpm2::ownership' do
           'lockout_auth'     => /^[\w]{24,}$/,
           'endorsement_auth' => /^[\w]{24,}$/,
           'owner_auth'       => /^[\w]{24,}$/,
-          'require'          => 'Service[tpm2-abrmd]',
+          'require'          => 'Class[Tpm2::Service]',
           })}
       end
 
@@ -44,7 +44,7 @@ describe 'tpm2::ownership' do
           'endorsement_auth' => 'MyMysteryPassword',
           'owner_auth'       => 'MyMysteryPassword',
           'in_hex'           => 'true',
-          'require'          => 'Service[tpm2-abrmd]',
+          'require'          => 'Class[Tpm2::Service]',
           })}
       end
     end

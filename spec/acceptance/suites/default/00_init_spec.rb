@@ -20,10 +20,7 @@ describe 'tpm2 class' do
     MANIFEST
   end
 
-  hosts_without_tpm = hosts_with_role(hosts,'notpm')
-  hosts_with_tpm =   hosts_with_role(hosts,'tpm')
-
-  hosts_with_tpm.each do |host|
+  hosts.each do |host|
     context "on #{host} with tpm" do
       it 'should install tpm2-abrmd' do
         install_package(host, 'tpm2-abrmd')
@@ -85,7 +82,7 @@ describe 'tpm2 class' do
     #     - tpm2-tabrmd service dies immediately after systemctl reports it
     #       started successfully; no AVC problems reported
     it 'should be running the tpm2-abrmd service' do
-       hosts_with_tpm.entries.each do |host|
+       hosts.entries.each do |host|
          stdout = on(host, 'puppet resource service tpm2-abrmd --to_yaml').stdout
          service = YAML.safe_load(stdout)['service']['tpm2-abrmd']
          expect{ service['ensure'].to eq 'running' }
@@ -93,7 +90,7 @@ describe 'tpm2 class' do
     end
 
     it 'should query tpm2 information with facter' do
-      hosts_with_tpm.entries.each do |host|
+      hosts.entries.each do |host|
         stdout = on(host, 'facter -p -y tpm2 --strict').stdout
         fact = YAML.safe_load(stdout)['tpm2']
         expect{ fact['tpm2_getcap'].to be_a Hash }

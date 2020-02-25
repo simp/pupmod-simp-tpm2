@@ -35,12 +35,14 @@ describe 'tpm2' do
         else
           context 'on  os version => 7' do
             it_behaves_like "tpm2 default"
-            it { is_expected.not_to create_class('tpm2::ownership') }
+            it { is_expected.to_not create_class('tpm2::ownership') }
+            it { is_expected.to_not contain_systemd__dropin_file('tabrm_service.conf') }
           end
         end
       end
 
-      context 'with detected TPM1 version TPM', :skip => xmessage do
+#      context 'with detected TPM1 version TPM', :skip => xmessage do
+      context 'with detected TPM1 version TPM' do
         let(:facts) do
           os_facts.merge({
             :tpm_version => 'tpm1'
@@ -52,8 +54,10 @@ describe 'tpm2' do
           end
         else
           context 'on  os version => 7' do
-            #it { is_expected.to contain_notify("tpm2_with_tpm1").with_message("NOTICE: Host has a tpm1 device; skipping TPM2 resources from module 'tpm2'")}
-            it { is_expected.to contain_notify('tpm2_with_tpm1')}
+            it 'should work damn it' do
+#            it { is_expected.to contain_notify('tpm2_with_tpm1').with_message("NOTICE: Host has a tpm1 device; skipping TPM2 resources from module 'tpm2'")}
+               is_expected.to create_notify('tpm2_with_tpm1')
+             end
           end
         end
       end
