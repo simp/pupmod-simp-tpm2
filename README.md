@@ -120,10 +120,15 @@ bundle exec rake beaker:suites
 
 #### TPM2 simulator
 
-The acceptance tests spin up a tpm2-simulator.  To our knowledge this has not
-been packaged for EL7, so a package has been provided as an RPM, currently
-hosted at https://github.com/op-ct/simp-tpm2-rpms/releases.
+The acceptance tests spin up a tpm2-simulator.  These simulators have been
+compiled and package by simp and are available in the simp-project
+repos, https://download.simp-project.com/simp/yum/.  See the spec/acceptance/nodesets
+for the exact repo.
 
+#### Debug
+
+The TPM2 developers provide a debug flag. Set the environemnt variable 
+G_MESSAGES_DEBUG=all and run tpm2-abrmd in a terminal.
 
 #### Environment variables
 

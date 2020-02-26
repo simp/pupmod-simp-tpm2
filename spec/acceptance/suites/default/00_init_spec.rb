@@ -14,6 +14,13 @@ describe 'tpm2 class' do
     }
   end
 
+  let(:tpm2_abrmd1_hieradata) do
+    {
+      # Required to use the IBM simulator
+      'tpm2::tabrm_options' => ['-t socket']
+    }
+  end
+
   let(:manifest) do
     <<-MANIFEST
       include 'tpm2'
@@ -45,6 +52,8 @@ describe 'tpm2 class' do
         if tpm2_abrmd_version
           if tpm2_abrmd_version.split('.').first.to_i > 1
             set_hieradata_on(host, tpm2_abrmd2_hieradata)
+          else
+            set_hieradata_on(host, tpm2_abrmd1_hieradata)
           end
         end
       end
