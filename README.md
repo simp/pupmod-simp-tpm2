@@ -14,8 +14,8 @@
   * [What tpm2 affects](#what-tpm2-affects)
   * [Beginning with tpm2](#beginning-with-tpm2)
 * [Usage](#usage)
-* [Reference](#reference)
 * [Limitations](#limitations)
+* [Reference](#reference)
 * [Development](#development)
   * [Acceptance tests](#acceptance-tests)
     * [TPM2 simulator](#tpm2-simulator)
@@ -78,7 +78,7 @@ tpm2::ownership::lock:  set
 tpm2::ownership::endorsement: set
 
 The passwords will default to automatically generated passwords using passgen.  If
-you want to set them to specific passwords then set them in hiera using the 
+you want to set them to specific passwords then set them in hiera using the
 following settings (it expects a minumum password length of 14 charaters):
 
 tpm2::ownership::owner_auth: 'MyOwnerPassword'
@@ -98,7 +98,7 @@ supported operating systems, Puppet versions, and module dependencies.
 
 ## Reference
 
-See [REFERENCE.md](REFERENCE.md) for API documentation.
+See [REFERENCE.md](./REFERENCE.md) for API documentation.
 
 ## Development
 
@@ -120,10 +120,15 @@ bundle exec rake beaker:suites
 
 #### TPM2 simulator
 
-The acceptance tests spin up a tpm2-simulator.  To our knowledge this has not
-been packaged for EL7, so a package has been provided as an RPM, currently
-hosted at https://github.com/op-ct/simp-tpm2-rpms/releases.
+The acceptance tests spin up a tpm2-simulator.  These simulators have been
+compiled and package by simp and are available in the simp-project
+repos, https://download.simp-project.com/simp/yum/.  See the spec/acceptance/nodesets
+for the exact repo.
 
+#### Debug
+
+The TPM2 developers provide a debug flag. Set the environemnt variable 
+G_MESSAGES_DEBUG=all and run tpm2-abrmd in a terminal.
 
 #### Environment variables
 

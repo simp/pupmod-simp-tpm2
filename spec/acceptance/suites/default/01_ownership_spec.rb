@@ -1,6 +1,9 @@
 require 'spec_helper_acceptance'
 require 'yaml'
 
+require_relative('../../lib/util')
+include Tpm2TestUtil
+
 RUN_IN_PARALLEL = ENV.fetch('BEAKER_RUN_IN_PARALLEL', '')
                      .split(',').include?('tests')
 test_name 'tpm2::ownership class'

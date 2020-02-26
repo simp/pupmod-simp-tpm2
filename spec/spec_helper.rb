@@ -97,6 +97,7 @@ RSpec.configure do |c|
     Puppet[:environmentpath] = @spec_global_env_temp
     Puppet[:user] = Etc.getpwuid(Process.uid).name
     Puppet[:group] = Etc.getgrgid(Process.gid).name
+    Puppet[:digest_algorithm] = 'sha256'
 
     if ENV.fetch('DEBUG','no') == 'yes'
       Puppet.debug=true

@@ -34,7 +34,7 @@ class Facter::TPM2::Util
   # Translate a TPM_PT_MANUFACTURER number into the TCG-registered ID strings
   #   (registry at: https://trustedcomputinggroup.org/vendor-id-registry/)
   #
-  # @param  [Numeric] number to decode (from `TPM_PT_MANUFACTURER`)
+  # @param num [Numeric] number to decode (from `TPM_PT_MANUFACTURER`)
   # @return [String] the decoded String
   def decode_uint32_string(num)
     # rubocop:disable Style/FormatStringToken
@@ -69,7 +69,8 @@ class Facter::TPM2::Util
   # The firmware manufacturer string and version numbers are decoded into UTF-8
   # according to the TPM 2.0 specs and observed implementations.
   #
-  # @param [Hash] properties, as collected by `tpm2_getcap -c properties-fixed`
+  # @param [Hash] fixed_props properties as collected by `tpm2_getcap -c properties-fixed`
+  # @param [Hash] variable_props properties as collected by `tpm2_getcap -c properties-variable`
   #
   # @return [Hash] Decoded
   def failure_safe_properties(fixed_props,variable_props)

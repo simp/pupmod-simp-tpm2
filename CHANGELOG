@@ -1,3 +1,10 @@
+* Mon Feb 24 2020 Jeanne Greulich <jeanne.greulich@onyxpoint.com> - 0.3.0
+- Added EL8 support
+- Added  ability to set options for abrmd service
+- Removed option for managing tools.  Tools can be managed
+  or not by removing them from the package list.  Note that the
+  tools package is needed to determine the status of the TPM.
+
 * Wed May 08 2019 Liz Nemsick <lnemsick.simp@gmail.com> - 0.2.0
 - Removed Puppet 4 support
 - Added Puppet 6 support

@@ -99,6 +99,8 @@ describe Facter::TPM2::Util do
 
       context 'when tpm2-tools cannot query the TABRM' do
         it 'should return nil' do
+          allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return( true )
+          allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( false )
           allow(Facter::Core::Execution).to receive(:execute).with( "#{@l_bin}/tpm2_pcrlist -s").and_return( nil )
           util = Facter::TPM2::Util.new
           expect( util.build_structured_fact ).to be nil
