@@ -1,8 +1,5 @@
 # @summary Provides utilities for interacting with a TPM2 device
 #
-# @param manage_tpm2_tools
-#   The module will manage the tpm2-tools packages unless `false`
-#
 # @param package_ensure
 #   The default ensure parmeter for packages.
 #

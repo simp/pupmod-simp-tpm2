@@ -19,6 +19,7 @@
 * [Development](#development)
   * [Acceptance tests](#acceptance-tests)
     * [TPM2 simulator](#tpm2-simulator)
+    * [Debug](#debug)
     * [Environment variables](#environment-variables)
 
 <!-- vim-markdown-toc -->
