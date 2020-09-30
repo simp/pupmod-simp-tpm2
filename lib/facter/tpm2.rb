@@ -1,7 +1,7 @@
-# A strucured fact that return some facts about a TPM 2.0 TPM
+# A structured fact that return some facts about a TPM 2.0 TPM
 #
 # The fact will be nil if the tpm2-tools are either not available, or aren't
-# configured to comminucate with the TPM
+# configured to communicate with the TPM
 Facter.add( :tpm2 ) do
 
   #### NOTE: The confine below is intentionally commented out to explain why

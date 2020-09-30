@@ -88,6 +88,20 @@ describe Facter::TPM2::Util do
         end
       end
     end
+    context 'when tpm2-tools cannot query the TABRM' do
+      it 'shuld not raise a failure' do
+        allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return( false )
+        allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return( true )
+
+        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-variable").and_return("\n")
+        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-fixed").and_return("\n")
+        allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_pcrlist -s").and_return("\n")
+
+        util = Facter::TPM2::Util.new
+        fact = util.build_structured_fact
+        expect(fact).to be_nil
+      end
+    end
   end
 
 

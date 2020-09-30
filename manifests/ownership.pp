@@ -1,18 +1,18 @@
 # @summary Provides the ability to set or clear the authentication passwords for the TPM
 #
-# At this time you can clear a set password but cannot change it another value.
+# At this time you can clear a set password but cannot change it to another value.
 #
 # To use this module, set tpm2::take_ownership to true in hiera
 # and set the parameters in hiera to override the defaults.
 #
 # @param owner
-#   The desired state fo the owner authentication.
+#   The desired state of the owner authentication.
 #
 # @param endorsement
-#   The desired state fo the endorsement authentication.
+#   The desired state of the endorsement authentication.
 #
 # @param lockout
-#   The desired state fo the lockout authentication.
+#   The desired state of the lockout authentication.
 #
 # @param owner_auth
 #   The password word for owner authentication.
@@ -34,7 +34,7 @@
 #    tpm2::ownership::lockout:  clear
 #    tpm2::ownership::endorsement: set
 #
-# The passwords will default to automatically generated passwords using passgen.  If
+# The passwords will default to automatically generated passwords using simplib::passgen.  If
 # you want to set them to specific passwords then set them in hiera using the
 # following settings (it expects a minumum password length of 14 charaters):
 #

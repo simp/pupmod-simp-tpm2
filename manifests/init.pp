@@ -1,10 +1,7 @@
 # @summary Provides utilities for interacting with a TPM2 device
 #
-# @param manage_tpm2_tools
-#   The module will manage the tpm2-tools packages unless `false`
-#
 # @param package_ensure
-#   The default ensure parmeter for packages.
+#   The default ensure parameter for packages.
 #
 # @param packages
 #   A Hash of packages needed for tpm2-tools.  The Hash format is:

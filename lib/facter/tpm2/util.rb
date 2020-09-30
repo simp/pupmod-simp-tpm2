@@ -104,10 +104,13 @@ class Facter::TPM2::Util
     end
 
     # Get fixed properties
-    yaml = exec('tpm2_getcap -c properties-fixed')
+    yaml = exec('tpm2_getcap -c properties-fixed').strip
+    return nil if yaml.empty?
     properties_fixed = YAML.safe_load(yaml)
+
     #Get variable properties
-    yaml = exec('tpm2_getcap -c properties-variable')
+    yaml = exec('tpm2_getcap -c properties-variable').strip
+    return nil if yaml.empty?
     properties_variable = YAML.safe_load(yaml)
 
     failure_safe_properties(properties_fixed, properties_variable)
