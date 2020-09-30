@@ -13,7 +13,7 @@
 
 ### Resource types
 
-* [`tpm2_ownership`](#tpm2_ownership): A type to manage ownership of a TPM 2.0.    Use this to set the passwords on a TPM to prevent unauthorized access.    It can not change the p
+* [`tpm2_ownership`](#tpm2_ownership): A type to manage ownership of a TPM 2.0.    Use this to set the passwords on a TPM to prevent unauthorized access.    It cannot change the pa
 
 ### Data types
 
@@ -80,12 +80,12 @@ Default value: ``undef``
 
 ### `tpm2::ownership`
 
-At this time you can clear a set password but cannot change it another value.
+At this time you can clear a set password but cannot change it to another value.
 
 To use this module, set tpm2::take_ownership to true in hiera
 and set the parameters in hiera to override the defaults.
 
-The passwords will default to automatically generated passwords using passgen.  If
+The passwords will default to automatically generated passwords using simplib::passgen.  If
 you want to set them to specific passwords then set them in hiera using the
 following settings (it expects a minumum password length of 14 charaters):
 
@@ -114,7 +114,7 @@ The following parameters are available in the `tpm2::ownership` class.
 
 Data type: `Enum['set','clear']`
 
-The desired state fo the owner authentication.
+The desired state of the owner authentication.
 
 Default value: `'clear'`
 
@@ -122,7 +122,7 @@ Default value: `'clear'`
 
 Data type: `Enum['set','clear']`
 
-The desired state fo the endorsement authentication.
+The desired state of the endorsement authentication.
 
 Default value: `'clear'`
 
@@ -130,7 +130,7 @@ Default value: `'clear'`
 
 Data type: `Enum['set','clear']`
 
-The desired state fo the lockout authentication.
+The desired state of the lockout authentication.
 
 Default value: `'clear'`
 
@@ -178,7 +178,7 @@ A type to manage ownership of a TPM 2.0.
 
   Use this to set the passwords on a TPM to prevent unauthorized access.
 
-  It can not change the passwords.
+  It cannot change the passwords.
 
 Example:
 
@@ -201,19 +201,19 @@ The following properties are available in the `tpm2_ownership` type.
 
 Valid values: `clear`, `set`
 
-Seting for owner authorization
+Setting for owner authorization
 
 ##### `lockout`
 
 Valid values: `clear`, `set`
 
-Seting for owner authorization
+Setting for owner authorization
 
 ##### `owner`
 
 Valid values: `clear`, `set`
 
-Seting for owner authorization
+Setting for owner authorization
 
 #### Parameters
 

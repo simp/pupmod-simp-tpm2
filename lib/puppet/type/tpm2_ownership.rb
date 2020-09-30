@@ -2,7 +2,7 @@
 #
 # @!puppet.type.param owner_auth TPM owner password. Required.
 # @!puppet.type.param lockout_auth TPM  lock out password. Required.
-# @!puppet.type.param endorsement_auth TPM endorsement hierachy password. Required.
+# @!puppet.type.param endorsement_auth TPM endorsement hierarchy password. Required.
 #
 # @!puppet.type.param in_hex If true, indicates the passwords are in Hex.
 #
@@ -21,7 +21,7 @@ Puppet::Type.newtype(:tpm2_ownership) do
 
   Use this to set the passwords on a TPM to prevent unauthorized access.
 
-  It can not change the passwords.
+  It cannot change the passwords.
 
 Example:
 
@@ -95,17 +95,17 @@ Example:
   end
 
   newproperty(:owner) do
-    desc ' Seting for owner authorization'
+    desc ' Setting for owner authorization'
     newvalues(:clear, :set)
   end
 
   newproperty(:endorsement) do
-    desc ' Seting for owner authorization'
+    desc ' Setting for owner authorization'
     newvalues(:clear, :set)
   end
 
   newproperty(:lockout) do
-    desc ' Seting for owner authorization'
+    desc ' Setting for owner authorization'
     newvalues(:clear, :set)
   end
 
