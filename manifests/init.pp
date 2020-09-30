@@ -1,7 +1,7 @@
 # @summary Provides utilities for interacting with a TPM2 device
 #
 # @param package_ensure
-#   The default ensure parmeter for packages.
+#   The default ensure parameter for packages.
 #
 # @param packages
 #   A Hash of packages needed for tpm2-tools.  The Hash format is:
