@@ -33,7 +33,7 @@ The following parameters are available in the `tpm2` class.
 
 Data type: `String[1]`
 
-The default ensure parmeter for packages.
+The default ensure parameter for packages.
 
 Default value: `simplib::lookup('simp_options::package_ensure', {'default_value' => 'installed'})`
 
