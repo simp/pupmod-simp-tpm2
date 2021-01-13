@@ -28,17 +28,9 @@ describe 'tpm2' do
       end
 
       context 'with default params' do
-        if os_facts[:os][:release][:major].to_i < 7
-          context 'on os version < 7 ' do
-            it { is_expected.to_not compile}
-          end
-        else
-          context 'on  os version => 7' do
-            it_behaves_like "tpm2 default"
-            it { is_expected.to_not create_class('tpm2::ownership') }
-            it { is_expected.to_not contain_systemd__dropin_file('tabrm_service.conf') }
-          end
-        end
+        it_behaves_like "tpm2 default"
+        it { is_expected.to_not create_class('tpm2::ownership') }
+        it { is_expected.to_not contain_systemd__dropin_file('tabrm_service.conf') }
       end
 
 #      context 'with detected TPM1 version TPM', :skip => xmessage do
@@ -48,17 +40,9 @@ describe 'tpm2' do
             :tpm_version => 'tpm1'
           })
         end
-        if os_facts[:os][:release][:major].to_i < 7
-          context 'on os version < 7 ' do
-            it { is_expected.to_not compile}
-          end
-        else
-          context 'on  os version => 7' do
-            it 'should work damn it' do
+        it 'should work damn it' do
 #            it { is_expected.to contain_notify('tpm2_with_tpm1').with_message("NOTICE: Host has a tpm1 device; skipping TPM2 resources from module 'tpm2'")}
-               is_expected.to create_notify('tpm2_with_tpm1')
-             end
-          end
+          is_expected.to create_notify('tpm2_with_tpm1')
         end
       end
 
@@ -68,25 +52,17 @@ describe 'tpm2' do
           :tabrm_service => 'tpm2-abrmd-service'
         }}
         let(:hieradata) { 'take_ownership' }
-
-        if os_facts[:os][:release][:major].to_i < 7
-          context 'on os version < 7 ' do
-            it { is_expected.to_not compile}
-          end
-        else
-          context 'on os version >= 7 ' do
-            it { is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with({
-              :unit => 'tpm2-abrmd-service.service',
-              :notify => 'Service[tpm2-abrmd-service]'
-            })}
-            it { is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with_content(<<-EOM.gsub(/^\s+/,'')
-              # This file managed by Puppet
-              [Service]
-              ExecStart=
-              ExecStart=/usr/sbin/tpm2-abrmd-service -option1 -option2 X
-              EOM
-            )}
-          end
+          it { is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with({
+            :unit => 'tpm2-abrmd-service.service',
+            :notify => 'Service[tpm2-abrmd-service]'
+          })}
+          it { is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with_content(<<-EOM.gsub(/^\s+/,'')
+            # This file managed by Puppet
+            [Service]
+            ExecStart=
+            ExecStart=/usr/sbin/tpm2-abrmd-service -option1 -option2 X
+            EOM
+          )}
         end
       end
 
@@ -95,19 +71,9 @@ describe 'tpm2' do
           :take_ownership => true
         }}
 
-        if os_facts[:os][:release][:major].to_i < 7
-          context 'on os version < 7 ' do
-            it { is_expected.to_not compile}
-          end
-        else
-          context 'on os version >= 7 ' do
-            it_behaves_like "tpm2 default"
-            it { is_expected.to contain_class('tpm2::ownership') }
-          end
-        end
-      # take_ownership true
+        it_behaves_like "tpm2 default"
+        it { is_expected.to contain_class('tpm2::ownership') }
       end
-      #TPM2.0
     end
   end
 end
