@@ -61,7 +61,6 @@ describe 'tpm2' do
             ExecStart=/usr/sbin/tpm2-abrmd-service -option1 -option2 X
             EOM
           )}
-        end
       end
 
       context 'with take_ownership true' do
