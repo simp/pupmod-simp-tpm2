@@ -1,3 +1,13 @@
+* Fri Jan 15 2021 Jeanne Greulich <jeanne.greulich@onyxpoint.com> - 0.3.2
+- Later versions of tpm2_tools renamed tpm2_pcrlist to tpm2_pcrread.
+  This updates the tpm2 fact to use the tpm2_getcap command
+  to determine if tpm2 tools are installed.  Since the pcrlist command was
+  only osed to determine if tpm2_tools were installed tpm2_getcap, which is used
+  for other things, is used in its place.
+- Removed requirement for fact tpm to not exist.  The tpm2 fact will be populated
+  if the tpm2 tools are installed and they can talk to the tpm.  If there is a tpm
+  fact out there from another module it will not affect this fact.
+
 * Wed Sep 30 2020 Trevor Vaughan <tvaughan@onyxpoint.com> - 0.3.1
 - Fixed a bug where the `tpm2_*` commands could return nothing which would
   trigger an error in further logic.

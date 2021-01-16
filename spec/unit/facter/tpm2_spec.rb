@@ -5,61 +5,70 @@ require 'ostruct'
 
 describe 'tpm2', :type => :fact do
 
-  before :all do
-    @l_bin = '/usr/local/bin'
-    @u_bin = '/usr/bin'
+  before :each do
+    Facter.clear
   end
-
-  context 'when the hardware TPM is TPM 1.2' do
-    it 'should return nil' do
-      allow(Facter).to receive(:value).with(:has_tpm).and_return true
-      allow(Facter).to receive(:value).with(:tpm).and_return({ :tpm1_hash => :values })
-      allow(Facter::Core::Execution).to receive(:execute).with(%r{uname$}).and_return true
-      allow(Facter::Core::Execution).to receive(:execute).with(%r{.*/?tpm_version$}, :timeout => 15).and_return nil
-      expect(Facter).to receive(:fact).with(:tpm2).and_call_original
-
-      expect(Facter.fact(:tpm2).value).to eq nil
-    end
+  let :tpm2_getcap do
+    '/usr/bin/tpm2_getcap'
   end
 
   context 'when tpm2-tools is not installed' do
     it 'should return nil' do
-      allow(Facter).to receive(:value).with(:has_tpm).and_return true
-      allow(Facter).to receive(:value).with(:tpm).and_return nil
-      allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return false
-      allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return false
-
+      allow(Facter::Core::Execution).to receive(:which).with('tpm2_getcap').and_return(nil)
       expect(Facter.fact(:tpm2).value).to eq nil
     end
   end
 
-  context 'when the hardware TPM is TPM 2.0' do
-    it 'should return a fact' do
-      allow(Facter).to receive(:value).with(:has_tpm).and_return true
-      allow(Facter).to receive(:value).with(:tpm).and_return nil
-      allow(File).to receive(:executable?).with("#{@l_bin}/tpm2_pcrlist").and_return false
-      allow(File).to receive(:executable?).with("#{@u_bin}/tpm2_pcrlist").and_return true
-      allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-fixed").and_return(
+  context 'when the TPM tools is installed' do
+    let :content_fixed do
         File.read File.expand_path(
           '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt6xx-fbfc85e.yaml',
           __FILE__,
         )
-      )
-      allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_getcap -c properties-variable").and_return(
+    end
+    let :content_variable do
         File.read File.expand_path(
           '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml',
           __FILE__,
         )
-      )
-      allow(Facter::Core::Execution).to receive(:execute).with("#{@u_bin}/tpm2_pcrlist -s").and_return(
-          "Supported Bank/Algorithm: sha1(0x0004) sha256(0x000b) sha384(0x000c)\n"
-        )
-      fact = Facter.fact(:tpm2).value
-      expect(fact).to be_a(Hash)
-      expect(fact['manufacturer']).to match(/.{0,4}/)
-      expect(fact['firmware_version']).to match(/^\d+\.\d+\.\d+\.\d+$/)
-      expect(fact['tpm2_getcap']['properties-fixed']).to be_a(Hash)
-      expect(fact['tpm2_getcap']['properties-variable']).to be_a(Hash)
+    end
+
+    context 'when the version of tpm2_getcap is less than 4.0.0' do
+      let :content do
+        "tool=\"tpm2_getcap\" version=\"3.0.2\" tctis=\"tabrmd,\"\n"
+      end
+
+
+      it 'should return a fact' do
+        allow(Facter::Core::Execution).to receive(:which).with('tpm2_getcap').and_return(tpm2_getcap)
+        allow(Facter::Core::Execution).to receive(:execute).with("#{tpm2_getcap} -v").and_return(content)
+        allow(Facter::Core::Execution).to receive(:execute).with("#{tpm2_getcap} -c properties-fixed").and_return(content_fixed)
+        allow(Facter::Core::Execution).to receive(:execute).with("#{tpm2_getcap} -c properties-variable").and_return(content_variable)
+        fact = Facter.fact(:tpm2).value
+        expect(fact).to be_a(Hash)
+        expect(fact['manufacturer']).to match(/.{0,4}/)
+        expect(fact['firmware_version']).to match(/^\d+\.\d+\.\d+\.\d+$/)
+        expect(fact['tpm2_getcap']['properties-fixed']).to be_a(Hash)
+        expect(fact['tpm2_getcap']['properties-variable']).to be_a(Hash)
+      end
+    end
+    context 'when the version of tpm2_getcap is greater than 4.0.0' do
+      let :content do
+        "tool=\"tpm2_getcap\" version=\"4.3.2\" tctis=\"tabrmd,\"\n"
+      end
+
+      it 'should return a fact' do
+        allow(Facter::Core::Execution).to receive(:which).with('tpm2_getcap').and_return(tpm2_getcap)
+        allow(Facter::Core::Execution).to receive(:execute).with("#{tpm2_getcap} -v").and_return(content)
+        allow(Facter::Core::Execution).to receive(:execute).with("#{tpm2_getcap} properties-fixed").and_return(content_fixed)
+        allow(Facter::Core::Execution).to receive(:execute).with("#{tpm2_getcap} properties-variable").and_return(content_variable)
+        fact = Facter.fact(:tpm2).value
+        expect(fact).to be_a(Hash)
+        expect(fact['manufacturer']).to match(/.{0,4}/)
+        expect(fact['firmware_version']).to match(/^\d+\.\d+\.\d+\.\d+$/)
+        expect(fact['tpm2_getcap']['properties-fixed']).to be_a(Hash)
+        expect(fact['tpm2_getcap']['properties-variable']).to be_a(Hash)
+      end
     end
   end
 end

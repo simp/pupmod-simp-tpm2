@@ -21,14 +21,19 @@ module Facter::TPM2; end
 #
 class Facter::TPM2::Util
   def initialize
-    @prefix = Facter::TPM2::Util.tpm2_tools_prefix
-  end
+    cmd  = Facter::Core::Execution.which('tpm2_getcap')
 
-  # Facter executes a CLI command using the tpm2-tools path
-  # @param [String] cmd The CLI command string for Facter to execute
-  def exec(cmd)
-    Facter.debug "executing '#{File.join(@prefix, cmd)}'"
-    Facter::Core::Execution.execute(File.join(@prefix, cmd))
+    # Between versions the options for 'tpm2_getcap' changed. Determine the
+    #  version and set the options.
+    output = Facter::Core::Execution.execute(%(#{cmd} -v))
+    result = output.match(/version="(\d+\.\d+\.\d+)/)
+    version = $1
+    if Gem::Version.new(version) < Gem::Version.new('4.0.0')
+      @tpm2_getcap = "#{cmd} -c"
+    else
+      @tpm2_getcap = "#{cmd}"
+    end
+    Facter.debug "tpm2_getcap version is #{version} using command #{@tpm2_getcap}"
   end
 
   # Translate a TPM_PT_MANUFACTURER number into the TCG-registered ID strings
@@ -92,24 +97,17 @@ class Facter::TPM2::Util
   # @return [Hash] TPM2 properties
   def build_structured_fact
 
-    # fail fast:
-    unless @prefix                 # must have tpm2-tools installed
-      Facter.debug 'path to tpm2-tools not found'
-      return nil
-    end
-
-    unless exec('tpm2_pcrlist -s') # tpm2-tools must report on TPM
-      Facter.debug 'no information returned from `tpm2_pcrlist -s`'
-      return nil
-    end
-
     # Get fixed properties
-    yaml = exec('tpm2_getcap -c properties-fixed').strip
+    yaml = Facter::Core::Execution.execute(%(#{@tpm2_getcap} properties-fixed))
+    return nil if yaml.nil?
+    yaml = yaml.strip
     return nil if yaml.empty?
     properties_fixed = YAML.safe_load(yaml)
 
     #Get variable properties
-    yaml = exec('tpm2_getcap -c properties-variable').strip
+    yaml = Facter::Core::Execution.execute(%(#{@tpm2_getcap} properties-variable))
+    return nil if yaml.nil?
+    yaml = yaml.strip
     return nil if yaml.empty?
     properties_variable = YAML.safe_load(yaml)
 
@@ -117,18 +115,4 @@ class Facter::TPM2::Util
 
   end
 
-  # Returns the path of the tpm2-tools binaries
-  # @return [String,nil] the first valid path found, or `nil` if no paths
-  #                      were found.
-  def self.tpm2_tools_prefix(paths = ['/usr/local/bin', '/usr/bin'])
-    cmd = 'tpm2_pcrlist'
-    tpm2_bin_path = nil
-    paths.each do |path|
-      if File.executable? File.join(path, cmd)
-        tpm2_bin_path = path
-        break
-      end
-    end
-    tpm2_bin_path
-  end
 end
