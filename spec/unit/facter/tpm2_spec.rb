@@ -20,22 +20,22 @@ describe 'tpm2', :type => :fact do
   end
 
   context 'when the TPM tools is installed' do
-    let :content_fixed do
-        File.read File.expand_path(
-          '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt6xx-fbfc85e.yaml',
-          __FILE__,
-        )
-    end
-    let :content_variable do
-        File.read File.expand_path(
-          '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml',
-          __FILE__,
-        )
-    end
 
     context 'when the version of tpm2_getcap is less than 4.0.0' do
       let :content do
         "tool=\"tpm2_getcap\" version=\"3.0.2\" tctis=\"tabrmd,\"\n"
+      end
+      let :content_fixed do
+          File.read File.expand_path(
+            '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-fixed/nuvoton-ncpt6xx-fbfc85e.yaml',
+            __FILE__,
+          )
+      end
+      let :content_variable do
+          File.read File.expand_path(
+            '../../../files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml',
+            __FILE__,
+          )
       end
 
 
@@ -55,6 +55,18 @@ describe 'tpm2', :type => :fact do
     context 'when the version of tpm2_getcap is greater than 4.0.0' do
       let :content do
         "tool=\"tpm2_getcap\" version=\"4.3.2\" tctis=\"tabrmd,\"\n"
+      end
+      let :content_fixed do
+          File.read File.expand_path(
+            '../../../files/tpm2/mocks/tpm2_getcap_properties-fixed/simulator_fixed.yaml',
+            __FILE__,
+          )
+      end
+      let :content_variable do
+          File.read File.expand_path(
+            '../../../files/tpm2/mocks/tpm2_getcap_properties-variable/clear-clear-clear.yaml',
+            __FILE__,
+          )
       end
 
       it 'should return a fact' do

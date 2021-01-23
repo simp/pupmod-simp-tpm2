@@ -2,8 +2,16 @@
 #
 # At this time you can clear a set password but cannot change it to another value.
 #
-# To use this module, set tpm2::take_ownership to true in hiera
-# and set the parameters in hiera to override the defaults.
+# This class works when tpm2-tools version 4.0.0 or later is installed.
+# You can call this directly but it will nto check the version of tpm2-tools
+# installed.  It will do nothing if the incorrect version is  installed.
+#
+# If you don't know what version of tpm2-tools will be installed then
+# set tpm2::take_ownership to true in hiera.
+# Using tpm2::takeownership will require 2 puppet runs but will allow you to configure
+# multiple machines with different tpm2-tools packages.
+#
+# You also need to set the parameters in hiera to override the defaults.
 #
 # @param owner
 #   The desired state of the owner authentication.
@@ -37,50 +45,34 @@
 #
 # @example
 #
-#  In Hiera set the following:
-#    tpm2::take_ownership: true
-#    tpm2::ownership::owner: set
-#    tpm2::ownership::lockout:  clear
-#    tpm2::ownership::endorsement: set
+# See the tpm2::ownership class for examples on setting it up from there.
+#
+# To call directly:
+#  In your manifest:
+#    include tpm2::ownership::changeauth
+#  In Hiera:
+#    tpm2::take_ownership: false
+#    tpm2::ownership::changeauth::owner: 'set'
 #
 # The passwords will default to automatically generated passwords using simplib::passgen.  If
 # you want to set them to specific passwords then set them in hiera using the
 # following settings (it expects a minumum password length of 14 charaters):
 #
-#   tpm2::ownership::owner_auth: 'MyOwnerPassword'
-#   tpm2::ownership::lockout_auth:  'MyLockPassword'
-#   tpm2::ownership::endorsement_auth: 'MyEndorsePassword'
+#   tpm2::ownership::changeauth::owner_auth: 'MyOwnerPassword'
+#   tpm2::ownership::changeauth::lockout_auth:  'MyLockPassword'
+#   tpm2::ownership::changeauth::endorsement_auth: 'MyEndorsePassword'
 #
 # @author SIMP Team https://simp-project.com
 #
-class tpm2::ownership(
-  Enum['set','clear','ignore']   $owner              = 'clear',
-  Enum['set','clear','ignore']   $endorsement        = 'clear',
-  Enum['set','clear','ignore']   $lockout            = 'clear',
+class tpm2::ownership::changeauth(
+  Enum['set','clear','ignore']   $owner              = 'ignore',
+  Enum['set','clear','ignore']   $endorsement        = 'ignore',
+  Enum['set','clear','ignore']   $lockout            = 'ignore',
   String[14]                     $owner_auth         = simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24}),
   String[14]                     $lockout_auth       = simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24}),
   String[14]                     $endorsement_auth   = simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
-  Boolean                        $in_hex             = false
 ){
 
-  if $facts['tpm2'] and $facts['tpm2']['tools_version'] {
-    if  versioncmp($facts['tpm2']['tools_version'], '4.0.0') < 0 {
-
-      if $owner == 'ignore' or $endorsement == 'ignore' or $lockout == 'ignore' {
-        fail("$modulename : 'ignore' is not a valid setting for param owner, endorsement or lockout when tpm2-tools verions < 4.0.0 is installed. Current version is ${facts['tpm2']['tools_version']}")
-      } else {
-        tpm2_ownership { 'tpm2':
-          owner            => $owner,
-          lockout          => $lockout,
-          endorsement      => $endorsement,
-          owner_auth       => $owner_auth,
-          endorsement_auth => $endorsement_auth,
-          lockout_auth     => $lockout_auth,
-          in_hex           => $in_hex,
-          require          => Class['tpm2::service']
-        }
-      }
-    } else {
     # tpm2-tools version >= 4.0.0
       unless $owner == 'ignore' {
         tpm2_changeauth { 'owner':
@@ -97,7 +89,7 @@ class tpm2::ownership(
         }
       }
       unless $endorement == 'ignore' {
-        tpm2_changeauth { 'endorement':
+        tpm2_changeauth { 'endorsement':
           auth    => $endorement_auth ,
           state   => $endorement,
           require => Class['tpm2::service']

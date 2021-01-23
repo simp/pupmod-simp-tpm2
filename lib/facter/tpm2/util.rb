@@ -27,13 +27,15 @@ class Facter::TPM2::Util
     #  version and set the options.
     output = Facter::Core::Execution.execute(%(#{cmd} -v))
     result = output.match(/version="(\d+\.\d+\.\d+)/)
-    version = $1
-    if Gem::Version.new(version) < Gem::Version.new('4.0.0')
+    @version = $1
+    if Gem::Version.new(@version) < Gem::Version.new('4.0.0')
       @tpm2_getcap = "#{cmd} -c"
+      @prefix = 'TPM'
     else
+      @prefix = 'TPM2'
       @tpm2_getcap = "#{cmd}"
     end
-    Facter.debug "tpm2_getcap version is #{version} using command #{@tpm2_getcap}"
+    Facter.debug "tpm2_getcap version is #{@version} using command #{@tpm2_getcap}"
   end
 
   # Translate a TPM_PT_MANUFACTURER number into the TCG-registered ID strings
@@ -60,10 +62,10 @@ class Facter::TPM2::Util
 
   def tpm2_vendor_strings( tpm2_properties )
     [
-       tpm2_properties['TPM_PT_VENDOR_STRING_1']['as string'],
-       tpm2_properties['TPM_PT_VENDOR_STRING_2']['as string'],
-       tpm2_properties['TPM_PT_VENDOR_STRING_3']['as string'],
-       tpm2_properties['TPM_PT_VENDOR_STRING_4']['as string'],
+       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_1"]['as string'],
+       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_2"]['as string'],
+       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_3"]['as string'],
+       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_4"]['as string'],
     ]
   end
 
@@ -81,13 +83,14 @@ class Facter::TPM2::Util
   def failure_safe_properties(fixed_props,variable_props)
     {
       'manufacturer'     => decode_uint32_string(
-                              fixed_props['TPM_PT_MANUFACTURER']
+                              fixed_props["#{@prefix}_PT_MANUFACTURER"]
                             ),
       'vendor_strings'   => tpm2_vendor_strings( fixed_props ),
       'firmware_version' => tpm2_firmware_version(
-                              fixed_props['TPM_PT_FIRMWARE_VERSION_1'],
-                              fixed_props['TPM_PT_FIRMWARE_VERSION_2']
+                              fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_1"],
+                              fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_2"]
                             ),
+      'tools_version'    => @version,
       'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
     }
   end
