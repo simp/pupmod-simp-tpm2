@@ -22,14 +22,14 @@ Puppet::Type.type(:tpm2_changeauth).provide(:tpm2_changeauth) do
   def set_auth(context, desired, auth)
     options = []
     case context
-    when :owner
+    when 'owner'
       options << ['-c', 'o']
-    when :lockout
+    when 'lockout'
       options << ['-c', 'l']
-    when :endorsement
+    when 'endorsement'
       options << ['-c', 'e']
     else
-      Puppet.warning("The context for tpm2_changeauth is not a known value.  Puppet will not attempt to change ownership.")
+      Puppet.warning("The context #{context} for tpm2_changeauth is not a known value. Valid values are 'owner', 'lockout' and 'endorsement'.  Puppet will not attempt to change ownership.")
       return
     end
 

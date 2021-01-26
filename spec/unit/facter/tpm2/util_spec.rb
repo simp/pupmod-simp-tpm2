@@ -81,7 +81,7 @@ describe Facter::TPM2::Util do
           expect(fact['manufacturer']).to match(/.{0,4}/)
           expect(fact['firmware_version']).to match(/^\d+\.\d+\.\d+\.\d+$/)
           expect(fact['tpm2_getcap']['properties-fixed']).to be_a(Hash)
-          expect(fact['tpm2_getcap']['properties-fixed']['TPM_PT_FAMILY_INDICATOR']['as string']).to eql '2.0'
+          expect(fact['tpm2_getcap']['properties-fixed']['TPM2_PT_FAMILY_INDICATOR']['value']).to eql '2.0'
         end
       end
     end

@@ -47,26 +47,46 @@ class Facter::TPM2::Util
     # rubocop:disable Style/FormatStringToken
     # NOTE: Only strip "\x00" from the end of strings; some registered
     #       identifiers include trailing spaces (e.g., 'NSM ')!
-    ('%x' % num).scan(/.{2}/).map { |x| x.hex.chr }.join.gsub(/\x00*$/,'')
-    # rubocop:enable Style/FormatStringToken
+    if num.instance_of? Hash
+      num['value']
+    else
+      ('%x' % num).scan(/.{2}/).map { |x| x.hex.chr }.join.gsub(/\x00*$/,'')
+      # rubocop:enable Style/FormatStringToken
+    end
   end
 
   # Converts two unsigned Integers in a 4-part version string
   def tpm2_firmware_version(tpm_pt_firmware_version_1,tpm_pt_firmware_version_2)
+    if tpm_pt_firmware_version_1.instance_of? Hash
+       _tpm_pt_firmware_version_1  = tpm_pt_firmware_version_1['raw']
+       _tpm_pt_firmware_version_2  = tpm_pt_firmware_version_2['raw']
+    else
+      _tpm_pt_firmware_version_1 = tpm_pt_firmware_version_1
+      _tpm_pt_firmware_version_2 = tpm_pt_firmware_version_2
+    end
     # rubocop:disable Style/FormatStringToken
-    s1 = ('%x' % tpm_pt_firmware_version_1).rjust(8,'0')
-    s2 = ('%x' % tpm_pt_firmware_version_2).rjust(8,'0')
+    s1 = ('%x' % _tpm_pt_firmware_version_1).rjust(8,'0')
+    s2 = ('%x' % _tpm_pt_firmware_version_2).rjust(8,'0')
     # rubocop:enable Style/FormatStringToken
     (s1.scan(/.{4}/) + s2.scan(/.{4}/)).map{|x| x.hex }.join('.')
   end
 
   def tpm2_vendor_strings( tpm2_properties )
-    [
-       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_1"]['as string'],
-       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_2"]['as string'],
-       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_3"]['as string'],
-       tpm2_properties["#{@prefix}_PT_VENDOR_STRING_4"]['as string'],
-    ]
+    if Gem::Version.new(@version) < Gem::Version.new('4.0.0')
+      [
+         tpm2_properties["#{@prefix}_PT_VENDOR_STRING_1"]['as string'],
+         tpm2_properties["#{@prefix}_PT_VENDOR_STRING_2"]['as string'],
+         tpm2_properties["#{@prefix}_PT_VENDOR_STRING_3"]['as string'],
+         tpm2_properties["#{@prefix}_PT_VENDOR_STRING_4"]['as string'],
+      ]
+    else
+      [
+        tpm2_properties["#{@prefix}_PT_VENDOR_STRING_1"]['value'],
+        tpm2_properties["#{@prefix}_PT_VENDOR_STRING_2"]['value'],
+        tpm2_properties["#{@prefix}_PT_VENDOR_STRING_3"]['value'],
+        tpm2_properties["#{@prefix}_PT_VENDOR_STRING_4"]['value'],
+      ]
+    end
   end
 
 

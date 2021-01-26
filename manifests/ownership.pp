@@ -1,4 +1,9 @@
-# @summary Provides the ability to set or clear the authentication passwords for the TPM
+# @summary This module is called by setting the hiera variable
+#   tpm2::take_ownership.  It will look at the tpm2 fact and
+#   determine if the tpm2-tools package has been installed and
+#   what version of the tools is installed
+#   and attempt to set or unset the authentication values for
+#   the owners, lockout and endorsement contexts.
 #
 # At this time you can clear a set password but cannot change it to another value.
 #
@@ -8,7 +13,7 @@
 # @param owner
 #   The desired state of the owner authentication.
 #   If tpm2-tools < 4.0.0 is installed you can not use the
-#   'ignore' option.  It attempts to set all 3.
+#   'ignore' option. The tool needs all 3 values to work.
 #   Puppet will display a warning and not attempt to set
 #   auth value if it is used and the earlier version of
 #   tpm tools is set.
@@ -67,43 +72,30 @@ class tpm2::ownership(
     if  versioncmp($facts['tpm2']['tools_version'], '4.0.0') < 0 {
 
       if $owner == 'ignore' or $endorsement == 'ignore' or $lockout == 'ignore' {
-        fail("$modulename : 'ignore' is not a valid setting for param owner, endorsement or lockout when tpm2-tools verions < 4.0.0 is installed. Current version is ${facts['tpm2']['tools_version']}")
+        fail("'ignore' is not a valid setting for param owner, endorsement or lockout when tpm2-tools verions < 4.0.0 is installed. Current version is ${facts['tpm2']['tools_version']}")
       } else {
-        tpm2_ownership { 'tpm2':
+        class { 'tpm2::ownership::takeownership':
           owner            => $owner,
           lockout          => $lockout,
           endorsement      => $endorsement,
           owner_auth       => $owner_auth,
           endorsement_auth => $endorsement_auth,
           lockout_auth     => $lockout_auth,
-          in_hex           => $in_hex,
-          require          => Class['tpm2::service']
+          in_hex           => $in_hex
         }
       }
     } else {
     # tpm2-tools version >= 4.0.0
-      unless $owner == 'ignore' {
-        tpm2_changeauth { 'owner':
-          auth    => $owner_auth,
-          state   => $owner,
-          require => Class['tpm2::service']
+        class { 'tpm2::ownership::changeauth':
+          owner            => $owner,
+          lockout          => $lockout,
+          endorsement      => $endorsement,
+          owner_auth       => $owner_auth,
+          endorsement_auth => $endorsement_auth,
+          lockout_auth     => $lockout_auth,
         }
-      }
-      unless $lockout == 'ignore' {
-        tpm2_changeauth { 'lockout':
-          auth    => $lockout_auth,
-          state   => $lockout,
-          require => Class['tpm2::service']
-        }
-      }
-      unless $endorement == 'ignore' {
-        tpm2_changeauth { 'endorement':
-          auth    => $endorement_auth ,
-          state   => $endorement,
-          require => Class['tpm2::service']
-        }
-      }
     }
+
   }
 
 }

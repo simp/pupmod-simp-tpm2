@@ -33,8 +33,16 @@
 #
 # @example
 #
-#  In Hiera set the following:
-#    tpm2::take_ownership: true
+#  See the Readme.md on how to use this class through the tpm2:ownership class. It can determine the version
+#  of tpm2_tools installed and call the correct class.  If you are sure you are using tpm2_tools
+#  you can call this module directly.
+#
+#  Also see the man page for tpm2_takeownership for further information.
+#  Ih hiera:
+#
+#    # Set tpm2::take_ownership to false to make sure a duplicate resource is not created.
+#    tpm2::take_ownership: false
+#    # all three values must be set to the desired state.
 #    tpm2::ownership::takeownership::owner: set
 #    tpm2::ownership::takeownership::lockout:  clear
 #    tpm2::ownership::takeownership::endorsement: set
@@ -43,6 +51,7 @@
 # you want to set them to specific passwords then set them in hiera using the
 # following settings (it expects a minumum password length of 14 charaters):
 #
+#   # If you want to clear a password you must know the current password.
 #   tpm2::ownership::takeownership::owner_auth: 'MyOwnerPassword'
 #   tpm2::ownership::takeownership::lockout_auth:  'MyLockPassword'
 #   tpm2::ownership::takeownership::endorsement_auth: 'MyEndorsePassword'

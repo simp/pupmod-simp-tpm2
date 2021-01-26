@@ -1,16 +1,9 @@
-# The tpm_ownership type allows you to take ownership of tpm0.
+# The tpm_changeuth type allows you to set the authentication token
+# for the owner, lockout and endorsement context on tpm2.
 #
-# @!puppet.type.param owner_auth TPM owner password. Required.
-# @!puppet.type.param lockout_auth TPM  lock out password. Required.
-# @!puppet.type.param endorsement_auth TPM endorsement hierarchy password. Required.
+# It can not change a password that is set.
 #
-# @!puppet.type.param in_hex If true, indicates the passwords are in Hex.
-#
-# @!puppet.type.param local If true, the provider will drop the
-#   passwords in a file in the puppet `$vardir`/simp/<tpmname>.
-#
-# @!puppet.type.param owned If true it will set the passwords on the TPM. Required
-#
+# See tpm2_changeauth --help for information on valid password values.
 #
 # @author SIMP Team <https://simp-project.com>
 #
@@ -18,6 +11,9 @@ require 'puppet/parameter/boolean'
 
 Puppet::Type.newtype(:tpm2_changeauth) do
   @doc = "A type to manage ownership of a TPM 2.0.
+
+  The context must be the name of the resource.  It only accepts
+  'owner', 'lockout' and 'endorsement' at this time.
 
   Use this to set the passwords on a TPM to prevent unauthorized access.
 
@@ -49,13 +45,15 @@ Example:
   end
 
   newparam(:auth) do
-    desc 'The password for the type'
+    desc 'The authentication value for the context'
     validate do |value|
       unless value.is_a?(String)
         raise(Puppet::Error, "auth must be a String, not '#{value.class}'")
       end
+      if value.empty?
+        raise(Puppet::Error, "auth must not be empty.")
+      end
     end
-    defaultto ''
   end
 
   newproperty(:state) do
