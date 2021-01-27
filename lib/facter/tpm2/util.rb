@@ -24,18 +24,71 @@ class Facter::TPM2::Util
     cmd  = Facter::Core::Execution.which('tpm2_getcap')
 
     # Between versions the options for 'tpm2_getcap' changed. Determine the
-    #  version and set the options.
+    # version and set the options.
     output = Facter::Core::Execution.execute(%(#{cmd} -v))
-    result = output.match(/version="(\d+\.\d+\.\d+)/)
-    @version = $1
-    if Gem::Version.new(@version) < Gem::Version.new('4.0.0')
-      @tpm2_getcap = "#{cmd} -c"
-      @prefix = 'TPM'
-    else
-      @prefix = 'TPM2'
-      @tpm2_getcap = "#{cmd}"
+    if output =~ /version="(\d+\.\d+\.\d+)/
+      @version = $1
+
+      if Gem::Version.new(@version) < Gem::Version.new('4.0.0')
+        @tpm2_getcap = "#{cmd} -c"
+        @prefix = 'TPM'
+      else
+        @prefix = 'TPM2'
+        @tpm2_getcap = "#{cmd}"
+      end
+      Facter.debug "tpm2_getcap version is #{@version} using command #{@tpm2_getcap}"
     end
-    Facter.debug "tpm2_getcap version is #{@version} using command #{@tpm2_getcap}"
+  end
+
+  # Returns a structured fact describing the TPM 2.0 data
+  #
+  # @return [nil] if TPM data cannot be retrieved.
+  # @return [Hash] TPM2 properties
+  def build_structured_fact
+    return nil unless @version
+
+    # Get fixed properties
+    yaml = Facter::Core::Execution.execute(%(#{@tpm2_getcap} properties-fixed))
+    return nil if yaml.nil?
+    yaml = yaml.strip
+    return nil if yaml.empty?
+    properties_fixed = YAML.safe_load(yaml)
+
+    #Get variable properties
+    yaml = Facter::Core::Execution.execute(%(#{@tpm2_getcap} properties-variable))
+    return nil if yaml.nil?
+    yaml = yaml.strip
+    return nil if yaml.empty?
+    properties_variable = YAML.safe_load(yaml)
+
+    failure_safe_properties(properties_fixed, properties_variable)
+  end
+
+  private
+
+  # Decode properties that the TPM is required to provide, even in failure mode
+  #
+  # The property keys and values are made as human-readable as possible.
+  # The firmware manufacturer string and version numbers are decoded into UTF-8
+  # according to the TPM 2.0 specs and observed implementations.
+  #
+  # @param [Hash] fixed_props properties as collected by `tpm2_getcap -c properties-fixed`
+  # @param [Hash] variable_props properties as collected by `tpm2_getcap -c properties-variable`
+  #
+  # @return [Hash] Decoded
+  def failure_safe_properties(fixed_props,variable_props)
+    {
+      'manufacturer'     => decode_uint32_string(
+                              fixed_props["#{@prefix}_PT_MANUFACTURER"]
+                            ),
+      'vendor_strings'   => tpm2_vendor_strings( fixed_props ),
+      'firmware_version' => tpm2_firmware_version(
+                              fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_1"],
+                              fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_2"]
+                            ),
+      'tools_version'    => @version,
+      'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
+    }
   end
 
   # Translate a TPM_PT_MANUFACTURER number into the TCG-registered ID strings
@@ -88,54 +141,4 @@ class Facter::TPM2::Util
       ]
     end
   end
-
-
-  # Decode properties that the TPM is required to provide, even in failure mode
-  #
-  # The property keys and values are made as human-readable as possible.
-  # The firmware manufacturer string and version numbers are decoded into UTF-8
-  # according to the TPM 2.0 specs and observed implementations.
-  #
-  # @param [Hash] fixed_props properties as collected by `tpm2_getcap -c properties-fixed`
-  # @param [Hash] variable_props properties as collected by `tpm2_getcap -c properties-variable`
-  #
-  # @return [Hash] Decoded
-  def failure_safe_properties(fixed_props,variable_props)
-    {
-      'manufacturer'     => decode_uint32_string(
-                              fixed_props["#{@prefix}_PT_MANUFACTURER"]
-                            ),
-      'vendor_strings'   => tpm2_vendor_strings( fixed_props ),
-      'firmware_version' => tpm2_firmware_version(
-                              fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_1"],
-                              fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_2"]
-                            ),
-      'tools_version'    => @version,
-      'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
-    }
-  end
-
-  # Returns a structured fact describing the TPM 2.0 data
-  # @return [nil] if TPM data cannot be retrieved.
-  # @return [Hash] TPM2 properties
-  def build_structured_fact
-
-    # Get fixed properties
-    yaml = Facter::Core::Execution.execute(%(#{@tpm2_getcap} properties-fixed))
-    return nil if yaml.nil?
-    yaml = yaml.strip
-    return nil if yaml.empty?
-    properties_fixed = YAML.safe_load(yaml)
-
-    #Get variable properties
-    yaml = Facter::Core::Execution.execute(%(#{@tpm2_getcap} properties-variable))
-    return nil if yaml.nil?
-    yaml = yaml.strip
-    return nil if yaml.empty?
-    properties_variable = YAML.safe_load(yaml)
-
-    failure_safe_properties(properties_fixed, properties_variable)
-
-  end
-
 end
