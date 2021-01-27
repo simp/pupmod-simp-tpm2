@@ -1,4 +1,9 @@
-# @summary Provides the ability to set or clear the authentication passwords for the TPM
+# @summary This module is called by setting the hiera variable
+#   tpm2::take_ownership.  It will look at the tpm2 fact and
+#   determine if the tpm2-tools package has been installed and
+#   what version of the tools is installed
+#   and attempt to set or unset the authentication values for
+#   the owners, lockout and endorsement contexts.
 #
 # At this time you can clear a set password but cannot change it to another value.
 #
@@ -7,12 +12,19 @@
 #
 # @param owner
 #   The desired state of the owner authentication.
+#   If tpm2-tools < 4.0.0 is installed you can not use the
+#   'ignore' option. The tool needs all 3 values to work.
+#   Puppet will display a warning and not attempt to set
+#   auth value if it is used and the earlier version of
+#   tpm tools is set.
 #
 # @param endorsement
 #   The desired state of the endorsement authentication.
+#   See owner param for more information.
 #
 # @param lockout
 #   The desired state of the lockout authentication.
+#   See owner param for more information.
 #
 # @param owner_auth
 #   The password word for owner authentication.
@@ -25,6 +37,8 @@
 #
 # @param in_hex
 #   Whether or not the passwords are in Hex.
+#   This value is ignore if tpm2_tools package > 4.0.0
+#   is installed.
 #
 # @example
 #
@@ -45,23 +59,43 @@
 # @author SIMP Team https://simp-project.com
 #
 class tpm2::ownership(
-  Enum['set','clear']            $owner              = 'clear',
-  Enum['set','clear']            $endorsement        = 'clear',
-  Enum['set','clear']            $lockout            = 'clear',
+  Enum['set','clear','ignore']   $owner              = 'clear',
+  Enum['set','clear','ignore']   $endorsement        = 'clear',
+  Enum['set','clear','ignore']   $lockout            = 'clear',
   String[14]                     $owner_auth         = simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24}),
   String[14]                     $lockout_auth       = simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24}),
   String[14]                     $endorsement_auth   = simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
   Boolean                        $in_hex             = false
 ){
 
-  tpm2_ownership { 'tpm2':
-    owner            => $owner,
-    lockout          => $lockout,
-    endorsement      => $endorsement,
-    owner_auth       => $owner_auth,
-    endorsement_auth => $endorsement_auth,
-    lockout_auth     => $lockout_auth,
-    in_hex           => $in_hex,
-    require          => Class['tpm2::service']
+  if $facts['tpm2'] and $facts['tpm2']['tools_version'] {
+    if  versioncmp($facts['tpm2']['tools_version'], '4.0.0') < 0 {
+
+      if $owner == 'ignore' or $endorsement == 'ignore' or $lockout == 'ignore' {
+        fail("'ignore' is not a valid setting for param owner, endorsement or lockout when tpm2-tools verions < 4.0.0 is installed. Current version is ${facts['tpm2']['tools_version']}")
+      } else {
+        class { 'tpm2::ownership::takeownership':
+          owner            => $owner,
+          lockout          => $lockout,
+          endorsement      => $endorsement,
+          owner_auth       => $owner_auth,
+          endorsement_auth => $endorsement_auth,
+          lockout_auth     => $lockout_auth,
+          in_hex           => $in_hex
+        }
+      }
+    } else {
+    # tpm2-tools version >= 4.0.0
+        class { 'tpm2::ownership::changeauth':
+          owner            => $owner,
+          lockout          => $lockout,
+          endorsement      => $endorsement,
+          owner_auth       => $owner_auth,
+          endorsement_auth => $endorsement_auth,
+          lockout_auth     => $lockout_auth,
+        }
     }
+
+  }
+
 }

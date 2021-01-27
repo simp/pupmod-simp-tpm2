@@ -1,3 +1,26 @@
+* Fri Jan 15 2021 Jeanne Greulich <jeanne.greulich@onyxpoint.com> - 0.3.2
+- This change updates the tpm2 fact and tpm2::ownership to handle changes in
+  tpm2_tools version 4.  The code was updated to provide for the following
+  changes in tpm2_tools:
+  - tpm2_pcrlist was changed to tpm2_pcrread.
+  - tpm2_takeownership was changed to tpm2_changeauth and its parameters
+    and functions were changed significantly.
+  - tpm2_getcap options were changed and format of the information
+    returned was changed.
+- The use of tpm2_pcrlist was replaced with tpm2_getcap since it was only used
+  to determine if tpm2_tools package was installed.
+- The version of the tools installed is derived from tpm2_getcap -v and included as
+  part of the tpm2 fact.
+- Removed requirement for fact tpm to not exist.  The tpm2 fact will be populated
+  if the tpm2 tools are installed and they can talk to the tpm.  If there is a tpm
+  fact out there from another module it will not affect this fact.
+- Added a provider for the tpm2_changeauth functionality that is equivalant to
+  what tpm2_takeownership did.
+- Updated tpm2::ownership to check the version of tools installed and call the correct
+  type and provider.  The tpm2::*auth parameters will accept a value of 'ignore' if
+  tpm2_tools version 4 or later is installed.  Otherwise the parameters for
+  tpm2::ownership have not changed.
+
 * Wed Sep 30 2020 Trevor Vaughan <tvaughan@onyxpoint.com> - 0.3.1
 - Fixed a bug where the `tpm2_*` commands could return nothing which would
   trigger an error in further logic.

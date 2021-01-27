@@ -71,7 +71,8 @@ To set the authentication passwords on the system:
 Include the tpm module and set the following in hiera:
 
 Note: You must indicate the desired status of all three authentications settings.
-They can be either 'set' or 'clear'.
+If using tpm2_tools version 4 or later you can use ignore to skip any of the settings.
+Otherwise they must each be set to  'clear' or 'set'.
 
 tpm2::take_ownership: true
 tpm2::ownership::owner: set
@@ -86,11 +87,19 @@ tpm2::ownership::owner_auth: 'MyOwnerPassword'
 tpm2::ownership::lock_auth:  'MyLockPassword'
 tpm2::ownership::endorse_autt: 'MyEndorsePassword'
 
+
+
 ## Limitations
 
 The tpm2_takeownership module cannot be used to change the current password. It would
 continually try to reset the password and would lock out the TPM.  It should be used
 to initialized or clear the TPM only.
+
+If the tpm2_tools are not installed it will take 2 passes to set or clear the authentication
+settings because it must first determine the version of tpm2_getcap installed.  The 
+tpm2::ownership modules can be use directly if you know what version of the tools will be installed.
+See the examples in the modules.
+
 
 SIMP Puppet modules are generally intended for use on Red Hat Enterprise Linux
 and compatible distributions, such as CentOS. Please see the
@@ -128,7 +137,7 @@ for the exact repo.
 
 #### Debug
 
-The TPM2 developers provide a debug flag. Set the environemnt variable 
+The TPM2 developers provide a debug flag. Set the environemnt variable
 G_MESSAGES_DEBUG=all and run tpm2-abrmd in a terminal.
 
 #### Environment variables

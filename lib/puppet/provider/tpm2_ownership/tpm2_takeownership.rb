@@ -1,7 +1,9 @@
-Puppet::Type.type(:tpm2_ownership).provide(:tpm2tools) do
-  desc 'tpm2tools providers uses the TCG software stack
-    and commands provided by tpm2-tools rpm to set the
-    authentication tokens for the tpm if it is a version 2
+Puppet::Type.type(:tpm2_ownership).provide(:tpm2_takeownership) do
+  desc 'tpm2_takeownership uses the TCG software stack
+    and the tpm2_takeownership command provided by tpm2-tool
+    package prior to version 4.  (Currently the version on tpm_tools
+    installed is  retreived using tpm2_getcap -v)
+    to set the authentication tokens for the tpm if it is a version 2
     tpm.
 
     @author SIMP Team https://simp-project.com'

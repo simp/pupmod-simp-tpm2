@@ -39,7 +39,7 @@ describe 'tpm2' do
             :tpm_version => 'tpm1'
           })
         end
-        it 'should work damn it' do
+        it 'should work properly' do
           is_expected.to create_notify('tpm2_with_tpm1')
         end
       end

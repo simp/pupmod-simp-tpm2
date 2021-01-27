@@ -3,7 +3,7 @@ require 'json'
 require 'yaml'
 require 'facter'
 
-describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools)' do
+describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2_takeownership)' do
 
   let(:all_clear) {
     YAML.safe_load(File.read(File.expand_path('spec/files/tpm2/mocks/tpm2_getcap_-c_properties-variable/clear-clear-clear.yaml')))
@@ -35,7 +35,7 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools)' do
     :owner        => 'clear',
     :lockout      => 'clear',
     :endorsement  => 'clear',
-    :provider     => 'tpm2tools'
+    :provider     => 'tpm2_takeownership'
     })}
 
   describe 'get_password_options' do
@@ -49,7 +49,7 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools)' do
         :owner            => 'set',
         :lockout          => 'set',
         :endorsement      => 'clear',
-        :provider         => 'tpm2tools'
+        :provider         => 'tpm2_takeownership'
         })}
 
       let (:current1) {{
@@ -78,7 +78,7 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools)' do
         :lockout          => 'clear',
         :endorsement      => 'set',
         :in_hex           => 'true',
-        :provider         => 'tpm2tools'
+        :provider         => 'tpm2_takeownership'
         })}
 
       let (:current2) {{
@@ -103,7 +103,7 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2tools)' do
         :owner            => 'clear',
         :lockout          => 'clear',
         :endorsement      => 'clear',
-        :provider         => 'tpm2tools'
+        :provider         => 'tpm2_takeownership'
       })}
 
       let (:current) {{
