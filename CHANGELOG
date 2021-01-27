@@ -1,11 +1,11 @@
 * Fri Jan 15 2021 Jeanne Greulich <jeanne.greulich@onyxpoint.com> - 0.3.2
 - This change updates the tpm2 fact and tpm2::ownership to handle changes in
-  tpm2_tools version 4.  The code was updated to provide for the folliwing
+  tpm2_tools version 4.  The code was updated to provide for the following
   changes in tpm2_tools:
   - tpm2_pcrlist was changed to tpm2_pcrread.
   - tpm2_takeownership was changed to tpm2_changeauth and its parameters
     and functions were changed significantly.
-  - tpm2_getcap aoptions were changed and format of the information
+  - tpm2_getcap options were changed and format of the information
     returned was changed.
 - The use of tpm2_pcrlist was replaced with tpm2_getcap since it was only used
   to determine if tpm2_tools package was installed.
