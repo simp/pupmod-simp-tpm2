@@ -1,9 +1,10 @@
-# @summary This module is called by setting the hiera variable
-#   tpm2::take_ownership.  It will look at the tpm2 fact and
-#   determine if the tpm2-tools package has been installed and
-#   what version of the tools is installed
-#   and attempt to set or unset the authentication values for
-#   the owners, lockout and endorsement contexts.
+# @summary Take ownership of a TPM device
+#
+# This class is called by setting the hiera variable tpm2::take_ownership.  It
+# will look at the tpm2 fact and determine if the tpm2-tools package has been
+# installed and what version of the tools is installed and attempt to set or
+# unset the authentication values for the owners, lockout and endorsement
+# contexts.
 #
 # At this time you can clear a set password but cannot change it to another value.
 #
