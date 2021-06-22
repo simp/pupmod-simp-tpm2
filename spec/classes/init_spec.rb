@@ -54,8 +54,11 @@ describe 'tpm2' do
             :unit => 'tpm2-abrmd-service.service',
             :notify => 'Service[tpm2-abrmd-service]'
           })}
-          it { is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with_content(<<-EOM.gsub(/^\s+/,'')
+          it { is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with_content(<<~EOM
             # This file managed by Puppet
+            [Unit]
+            ConditionPathExistsGlob=
+
             [Service]
             ExecStart=
             ExecStart=/usr/sbin/tpm2-abrmd-service -option1 -option2 X

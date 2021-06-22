@@ -4,11 +4,15 @@ class tpm2::service {
 
   if $tpm2::tabrm_options {
     $_cmd_opts = join($tpm2::tabrm_options, ' ')
+    $_exec_path = "/usr/sbin/${tpm2::tabrm_service}"
     $_override = @("OVERRIDE")
       # This file managed by Puppet
+      [Unit]
+      ConditionPathExistsGlob=
+
       [Service]
       ExecStart=
-      ExecStart=/usr/sbin/${tpm2::tabrm_service} ${_cmd_opts}
+      ExecStart=${_exec_path} ${_cmd_opts}
       | OVERRIDE
 
     systemd::dropin_file { 'tabrm_service.conf':
@@ -20,6 +24,6 @@ class tpm2::service {
 
   service{ $tpm2::tabrm_service:
     ensure => running,
-    enable =>  true,
+    enable =>  true
   }
 }

@@ -1,4 +1,4 @@
-# @summary Provides the ability to set or clear the authentication passwords for the TPM
+# @summary Set or clear the authentication passwords for the TPM
 #
 # At this time you can clear a set password but cannot change it to another value.
 #
@@ -34,25 +34,28 @@
 #
 # @example
 #
-# See the tpm2::ownership class for examples on setting it up from there.
+#   See the tpm2::ownership class for examples on setting it up from there.
 #
-# To call directly:
-#  In your manifest:
-#    include tpm2::ownership::changeauth
-#  In Hiera:
-#    tpm2::take_ownership: false
-#    tpm2::ownership::changeauth::owner: 'set'
+#   To call directly:
+#    In your manifest:
+#      include tpm2::ownership::changeauth
+#    In Hiera:
+#      tpm2::take_ownership: false
+#      tpm2::ownership::changeauth::owner: 'set'
 #
-# The passwords will default to automatically generated passwords using simplib::passgen.  If
-# you want to set them to specific passwords then set them in hiera using the
-# following settings (it expects a minumum password length of 14 charaters):
+#   The passwords will default to automatically generated passwords using
+#   simplib::passgen.  If you want to set them to specific passwords then set
+#   them in hiera using the following settings (it expects a minumum password
+#   length of 14 charaters):
 #
-#   tpm2::ownership::changeauth::owner_auth: 'MyOwnerPassword'
-#   tpm2::ownership::changeauth::lockout_auth:  'MyLockPassword'
-#   tpm2::ownership::changeauth::endorsement_auth: 'MyEndorsePassword'
+#     tpm2::ownership::changeauth::owner_auth: 'MyOwnerPassword'
+#     tpm2::ownership::changeauth::lockout_auth:  'MyLockPassword'
+#     tpm2::ownership::changeauth::endorsement_auth: 'MyEndorsePassword'
 #
-#  See the man page for tpm2_changeauth for more information.  Note: not all of the command
-#  options are currently available through the type.
+#    See the man page for tpm2_changeauth for more information.
+#
+#    Note: not all of the command options are currently available through the
+#    type.
 #
 # @author SIMP Team https://simp-project.com
 #

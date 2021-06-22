@@ -8,11 +8,14 @@
 
 * [`tpm2`](#tpm2): Provides utilities for interacting with a TPM2 device
 * [`tpm2::install`](#tpm2install): @summary Install tpm2 packages
-* [`tpm2::ownership`](#tpm2ownership): Provides the ability to set or clear the authentication passwords for the TPM
+* [`tpm2::ownership`](#tpm2ownership): Take ownership of a TPM device
+* [`tpm2::ownership::changeauth`](#tpm2ownershipchangeauth): Set or clear the authentication passwords for the TPM
+* [`tpm2::ownership::takeownership`](#tpm2ownershiptakeownership): Provides the ability to set or clear the authentication passwords for the TPM
 * [`tpm2::service`](#tpm2service): A private class to ensure that the TABRM service is running
 
 ### Resource types
 
+* [`tpm2_changeauth`](#tpm2_changeauth): A type to manage ownership of a TPM 2.0.    The context must be the name of the resource.  It only accepts   'owner', 'lockout' and 'endorsem
 * [`tpm2_ownership`](#tpm2_ownership): A type to manage ownership of a TPM 2.0.    Use this to set the passwords on a TPM to prevent unauthorized access.    It cannot change the pa
 
 ### Data types
@@ -21,15 +24,21 @@
 
 ## Classes
 
-### `tpm2`
+### <a name="tpm2"></a>`tpm2`
 
 Provides utilities for interacting with a TPM2 device
 
 #### Parameters
 
-The following parameters are available in the `tpm2` class.
+The following parameters are available in the `tpm2` class:
 
-##### `package_ensure`
+* [`package_ensure`](#package_ensure)
+* [`packages`](#packages)
+* [`take_ownership`](#take_ownership)
+* [`tabrm_service`](#tabrm_service)
+* [`tabrm_options`](#tabrm_options)
+
+##### <a name="package_ensure"></a>`package_ensure`
 
 Data type: `String[1]`
 
@@ -37,7 +46,7 @@ The default ensure parameter for packages.
 
 Default value: `simplib::lookup('simp_options::package_ensure', {'default_value' => 'installed'})`
 
-##### `packages`
+##### <a name="packages"></a>`packages`
 
 Data type: `Hash[String[1], Hash[String[1],String[1]]]`
 
@@ -50,7 +59,7 @@ A Hash of packages needed for tpm2-tools.  The Hash format is:
 
 Default value: `simplib::lookup('tpm2::packages')`
 
-##### `take_ownership`
+##### <a name="take_ownership"></a>`take_ownership`
 
 Data type: `Boolean`
 
@@ -58,7 +67,7 @@ Enable to allow Puppet to take ownership of the TPM
 
 Default value: ``false``
 
-##### `tabrm_service`
+##### <a name="tabrm_service"></a>`tabrm_service`
 
 Data type: `String[1]`
 
@@ -66,7 +75,7 @@ Systemd name of the abrmd-service
 
 Default value: `'tpm2-abrmd'`
 
-##### `tabrm_options`
+##### <a name="tabrm_options"></a>`tabrm_options`
 
 Data type: `Optional[Array[String[1]]]`
 
@@ -74,11 +83,17 @@ An **unvalidated** list of options to pass to $tabrm_service at start time
 
 Default value: ``undef``
 
-### `tpm2::install`
+### <a name="tpm2install"></a>`tpm2::install`
 
 @summary Install tpm2 packages
 
-### `tpm2::ownership`
+### <a name="tpm2ownership"></a>`tpm2::ownership`
+
+This class is called by setting the hiera variable tpm2::take_ownership.  It
+will look at the tpm2 fact and determine if the tpm2-tools package has been
+installed and what version of the tools is installed and attempt to set or
+unset the authentication values for the owners, lockout and endorsement
+contexts.
 
 At this time you can clear a set password but cannot change it to another value.
 
@@ -108,33 +123,48 @@ In Hiera set the following:
 
 #### Parameters
 
-The following parameters are available in the `tpm2::ownership` class.
+The following parameters are available in the `tpm2::ownership` class:
 
-##### `owner`
+* [`owner`](#owner)
+* [`endorsement`](#endorsement)
+* [`lockout`](#lockout)
+* [`owner_auth`](#owner_auth)
+* [`lockout_auth`](#lockout_auth)
+* [`endorsement_auth`](#endorsement_auth)
+* [`in_hex`](#in_hex)
 
-Data type: `Enum['set','clear']`
+##### <a name="owner"></a>`owner`
+
+Data type: `Enum['set','clear','ignore']`
 
 The desired state of the owner authentication.
+If tpm2-tools < 4.0.0 is installed you can not use the
+'ignore' option. The tool needs all 3 values to work.
+Puppet will display a warning and not attempt to set
+auth value if it is used and the earlier version of
+tpm tools is set.
 
 Default value: `'clear'`
 
-##### `endorsement`
+##### <a name="endorsement"></a>`endorsement`
 
-Data type: `Enum['set','clear']`
+Data type: `Enum['set','clear','ignore']`
 
 The desired state of the endorsement authentication.
+See owner param for more information.
 
 Default value: `'clear'`
 
-##### `lockout`
+##### <a name="lockout"></a>`lockout`
 
-Data type: `Enum['set','clear']`
+Data type: `Enum['set','clear','ignore']`
 
 The desired state of the lockout authentication.
+See owner param for more information.
 
 Default value: `'clear'`
 
-##### `owner_auth`
+##### <a name="owner_auth"></a>`owner_auth`
 
 Data type: `String[14]`
 
@@ -142,7 +172,7 @@ The password word for owner authentication.
 
 Default value: `simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24})`
 
-##### `lockout_auth`
+##### <a name="lockout_auth"></a>`lockout_auth`
 
 Data type: `String[14]`
 
@@ -150,7 +180,7 @@ The password word for lockout authentication.
 
 Default value: `simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24})`
 
-##### `endorsement_auth`
+##### <a name="endorsement_auth"></a>`endorsement_auth`
 
 Data type: `String[14]`
 
@@ -158,21 +188,294 @@ The password word for endorsement authentication.
 
 Default value: `simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24})`
 
-##### `in_hex`
+##### <a name="in_hex"></a>`in_hex`
 
 Data type: `Boolean`
 
 Whether or not the passwords are in Hex.
+This value is ignore if tpm2_tools package > 4.0.0
+is installed.
 
 Default value: ``false``
 
-### `tpm2::service`
+### <a name="tpm2ownershipchangeauth"></a>`tpm2::ownership::changeauth`
+
+At this time you can clear a set password but cannot change it to another value.
+
+This class works when tpm2-tools version 4.0.0 or later is installed.
+You can call this directly but it will not check the version of tpm2-tools
+installed.  It will do nothing if the incorrect version is  installed.
+
+If you don't know what version of tpm2-tools will be installed then
+set tpm2::take_ownership to true in hiera. See the Readme for more information.
+Using tpm2::takeownership will require 2 puppet runs but will allow you to configure
+multiple machines with different tpm2-tools packages.
+
+#### Examples
+
+##### 
+
+```puppet
+
+See the tpm2::ownership class for examples on setting it up from there.
+
+To call directly:
+ In your manifest:
+   include tpm2::ownership::changeauth
+ In Hiera:
+   tpm2::take_ownership: false
+   tpm2::ownership::changeauth::owner: 'set'
+
+The passwords will default to automatically generated passwords using
+simplib::passgen.  If you want to set them to specific passwords then set
+them in hiera using the following settings (it expects a minumum password
+length of 14 charaters):
+
+  tpm2::ownership::changeauth::owner_auth: 'MyOwnerPassword'
+  tpm2::ownership::changeauth::lockout_auth:  'MyLockPassword'
+  tpm2::ownership::changeauth::endorsement_auth: 'MyEndorsePassword'
+
+ See the man page for tpm2_changeauth for more information.
+
+ Note: not all of the command options are currently available through the
+ type.
+```
+
+#### Parameters
+
+The following parameters are available in the `tpm2::ownership::changeauth` class:
+
+* [`owner`](#owner)
+* [`endorsement`](#endorsement)
+* [`lockout`](#lockout)
+* [`owner_auth`](#owner_auth)
+* [`lockout_auth`](#lockout_auth)
+* [`endorsement_auth`](#endorsement_auth)
+
+##### <a name="owner"></a>`owner`
+
+Data type: `Enum['set','clear','ignore']`
+
+The desired state of the owner authentication.
+Valid setting are set, clear and ignore.
+
+Default value: `'ignore'`
+
+##### <a name="endorsement"></a>`endorsement`
+
+Data type: `Enum['set','clear','ignore']`
+
+The desired state of the endorsement authentication.
+Valid setting are set, clear and ignore.
+
+Default value: `'ignore'`
+
+##### <a name="lockout"></a>`lockout`
+
+Data type: `Enum['set','clear','ignore']`
+
+The desired state of the lockout authentication.
+Valid setting are set, clear and ignore.
+
+Default value: `'ignore'`
+
+##### <a name="owner_auth"></a>`owner_auth`
+
+Data type: `String[14]`
+
+The password word for owner authentication.
+
+Default value: `simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24})`
+
+##### <a name="lockout_auth"></a>`lockout_auth`
+
+Data type: `String[14]`
+
+The password word for lockout authentication.
+
+Default value: `simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24})`
+
+##### <a name="endorsement_auth"></a>`endorsement_auth`
+
+Data type: `String[14]`
+
+The password word for endorsement authentication.
+
+Default value: `simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24})`
+
+### <a name="tpm2ownershiptakeownership"></a>`tpm2::ownership::takeownership`
+
+At this time you can clear a set password but cannot change it to another value.
+
+You can call this module directly or set tpm2::take_ownership to true in hiera.
+Using tpm2::takeownership will require 2 puppet runs but will allow you to configure
+multiple machines with different tpm2-tools packages.
+
+You also need to set the parameters in hiera to override the defaults.
+
+The passwords will default to automatically generated passwords using simplib::passgen.  If
+you want to set them to specific passwords then set them in hiera using the
+following settings (it expects a minumum password length of 14 charaters):
+
+  # If you want to clear a password you must know the current password.
+  tpm2::ownership::takeownership::owner_auth: 'MyOwnerPassword'
+  tpm2::ownership::takeownership::lockout_auth:  'MyLockPassword'
+  tpm2::ownership::takeownership::endorsement_auth: 'MyEndorsePassword'
+
+#### Examples
+
+##### 
+
+```puppet
+
+See the Readme.md on how to use this class through the tpm2:ownership class. It can determine the version
+of tpm2_tools installed and call the correct class.  If you are sure you are using tpm2_tools
+you can call this module directly.
+
+Also see the man page for tpm2_takeownership for further information.
+Ih hiera:
+
+  # Set tpm2::take_ownership to false to make sure a duplicate resource is not created.
+  tpm2::take_ownership: false
+  # all three values must be set to the desired state.
+  tpm2::ownership::takeownership::owner: set
+  tpm2::ownership::takeownership::lockout:  clear
+  tpm2::ownership::takeownership::endorsement: set
+```
+
+#### Parameters
+
+The following parameters are available in the `tpm2::ownership::takeownership` class:
+
+* [`owner`](#owner)
+* [`endorsement`](#endorsement)
+* [`lockout`](#lockout)
+* [`owner_auth`](#owner_auth)
+* [`lockout_auth`](#lockout_auth)
+* [`endorsement_auth`](#endorsement_auth)
+* [`in_hex`](#in_hex)
+
+##### <a name="owner"></a>`owner`
+
+Data type: `Enum['set','clear']`
+
+The desired state of the owner authentication.
+
+Default value: `'clear'`
+
+##### <a name="endorsement"></a>`endorsement`
+
+Data type: `Enum['set','clear']`
+
+The desired state of the endorsement authentication.
+
+Default value: `'clear'`
+
+##### <a name="lockout"></a>`lockout`
+
+Data type: `Enum['set','clear']`
+
+The desired state of the lockout authentication.
+
+Default value: `'clear'`
+
+##### <a name="owner_auth"></a>`owner_auth`
+
+Data type: `String[14]`
+
+The password word for owner authentication.
+
+Default value: `simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24})`
+
+##### <a name="lockout_auth"></a>`lockout_auth`
+
+Data type: `String[14]`
+
+The password word for lockout authentication.
+
+Default value: `simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24})`
+
+##### <a name="endorsement_auth"></a>`endorsement_auth`
+
+Data type: `String[14]`
+
+The password word for endorsement authentication.
+
+Default value: `simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24})`
+
+##### <a name="in_hex"></a>`in_hex`
+
+Data type: `Boolean`
+
+Whether or not the passwords are in Hex.
+This value is ignore if tpm2_tools package > 4.0.0
+is installed.
+
+Default value: ``false``
+
+### <a name="tpm2service"></a>`tpm2::service`
 
 A private class to ensure that the TABRM service is running
 
 ## Resource types
 
-### `tpm2_ownership`
+### <a name="tpm2_changeauth"></a>`tpm2_changeauth`
+
+A type to manage ownership of a TPM 2.0.
+
+  The context must be the name of the resource.  It only accepts
+  'owner', 'lockout' and 'endorsement' at this time.
+
+  Use this to set the passwords on a TPM to prevent unauthorized access.
+
+  It cannot change the passwords but it can clear the password
+
+Example:
+
+  include 'tpm'
+
+  tpm2_changeauth { 'owner':
+    auth       =>  'badpasswd,
+    state      =>  'set'
+  }
+
+#### Properties
+
+The following properties are available in the `tpm2_changeauth` type.
+
+##### `state`
+
+Valid values: `clear`, `set`
+
+Whether to set the password or clear the current password. It can not change a password at this time.
+You must know the current password to clear the password
+
+#### Parameters
+
+The following parameters are available in the `tpm2_changeauth` type.
+
+* [`auth`](#auth)
+* [`name`](#name)
+* [`provider`](#provider)
+
+##### <a name="auth"></a>`auth`
+
+The authentication value for the context
+
+##### <a name="name"></a>`name`
+
+namevar
+
+The value of the context object to change the authorization on.  Currently only handles  owner, lockout, or  endorsement
+
+Default value: `owner`
+
+##### <a name="provider"></a>`provider`
+
+The specific backend to use for this `tpm2_changeauth` resource. You will seldom need to specify this --- Puppet will
+usually discover the appropriate provider for your platform.
+
+### <a name="tpm2_ownership"></a>`tpm2_ownership`
 
 A type to manage ownership of a TPM 2.0.
 
@@ -219,13 +522,21 @@ Setting for owner authorization
 
 The following parameters are available in the `tpm2_ownership` type.
 
-##### `endorsement_auth`
+* [`endorsement_auth`](#endorsement_auth)
+* [`in_hex`](#in_hex)
+* [`local`](#local)
+* [`lockout_auth`](#lockout_auth)
+* [`name`](#name)
+* [`owner_auth`](#owner_auth)
+* [`provider`](#provider)
+
+##### <a name="endorsement_auth"></a>`endorsement_auth`
 
 The endorse password of the TPM
 
 Default value: `''`
 
-##### `in_hex`
+##### <a name="in_hex"></a>`in_hex`
 
 Valid values: ``true``, ``false``, `yes`, `no`
 
@@ -233,7 +544,7 @@ Whether or not the passwords are in hex
 
 Default value: ``false``
 
-##### `local`
+##### <a name="local"></a>`local`
 
 Valid values: ``true``, ``false``, `yes`, `no`
 
@@ -241,13 +552,13 @@ Whether to save the passwords on the local system
 
 Default value: ``false``
 
-##### `lockout_auth`
+##### <a name="lockout_auth"></a>`lockout_auth`
 
 The lock out password of the TPM
 
 Default value: `''`
 
-##### `name`
+##### <a name="name"></a>`name`
 
 namevar
 
@@ -256,22 +567,26 @@ this type of resource once in your node scope
 
 Default value: `tpm2`
 
-##### `owner_auth`
+##### <a name="owner_auth"></a>`owner_auth`
 
 The owner password of the TPM
 
 Default value: `''`
 
-##### `provider`
+##### <a name="provider"></a>`provider`
 
 The specific backend to use for this `tpm2_ownership` resource. You will seldom need to specify this --- Puppet will
 usually discover the appropriate provider for your platform.
 
 ## Data types
 
-### `Tpm2::Ownership`
+### <a name="tpm2ownership"></a>`Tpm2::Ownership`
 
 Valid ownership options for TPM2
 
-Alias of `Enum['set', 'clear']`
+Alias of
+
+```puppet
+Enum['set', 'clear']
+```
 
