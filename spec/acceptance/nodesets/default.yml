@@ -24,7 +24,7 @@ HOSTS:
       - default
       - tpm
     platform:   el-8-x86_64
-    box:        centos/8
+    box:        generic/centos8
     hypervisor: <%= hypervisor %>
     yum_repos:
       # The TPM2 simulator RPMs are currently in the unstable repositories
