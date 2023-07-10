@@ -63,9 +63,9 @@ class tpm2::ownership::changeauth(
   Enum['set','clear','ignore']   $owner              = 'ignore',
   Enum['set','clear','ignore']   $endorsement        = 'ignore',
   Enum['set','clear','ignore']   $lockout            = 'ignore',
-  String[14]                     $owner_auth         = simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24}),
-  String[14]                     $lockout_auth       = simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24}),
-  String[14]                     $endorsement_auth   = simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
+  String[14]                     $owner_auth         = simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", {'length'=> 24}),
+  String[14]                     $lockout_auth       = simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", {'length'=> 24}),
+  String[14]                     $endorsement_auth   = simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
 ){
 
 
