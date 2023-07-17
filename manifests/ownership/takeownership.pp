@@ -62,9 +62,9 @@ class tpm2::ownership::takeownership(
   Enum['set','clear']   $owner              = 'clear',
   Enum['set','clear']   $endorsement        = 'clear',
   Enum['set','clear']   $lockout            = 'clear',
-  String[14]            $owner_auth         = simplib::passgen("${facts['fqdn']}_tpm_owner_auth", {'length'=> 24}),
-  String[14]            $lockout_auth       = simplib::passgen("${facts['fqdn']}_tpm_lock_auth", {'length'=> 24}),
-  String[14]            $endorsement_auth   = simplib::passgen("${facts['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
+  String[14]            $owner_auth         = simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", {'length'=> 24}),
+  String[14]            $lockout_auth       = simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", {'length'=> 24}),
+  String[14]            $endorsement_auth   = simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
   Boolean               $in_hex             = false
 ){
 
