@@ -1,6 +1,6 @@
 {
   "name": "simp-tpm2",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "SIMP Team",
   "summary": "Manage TPM2.0 devices",
   "license": "Apache-2.0",
@@ -46,6 +46,12 @@
     },
     {
       "operatingsystem": "Rocky",
+      "operatingsystemrelease": [
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "AlmaLinux",
       "operatingsystemrelease": [
         "8"
       ]
