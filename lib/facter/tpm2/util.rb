@@ -26,7 +26,7 @@ class Facter::TPM2::Util
     # Between versions the options for 'tpm2_getcap' changed. Determine the
     # version and set the options.
     output = Facter::Core::Execution.execute(%(#{cmd} -v))
-    if output =~ /version="(\d+\.\d+\.\d+)/
+    if output =~ /version="(\d+\.\d+(\.\d+)?)/
       @version = $1
 
       if Gem::Version.new(@version) < Gem::Version.new('4.0.0')
