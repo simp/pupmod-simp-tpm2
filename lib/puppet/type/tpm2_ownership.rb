@@ -37,9 +37,9 @@ Example:
   }
 "
 
-  feature :take_ownership, "The ability to take ownership of a TPM"
+  feature :take_ownership, 'The ability to take ownership of a TPM'
 
-  newparam(:name, :namevar => true) do
+  newparam(:name, namevar: true) do
     desc 'A static name assigned to this type. You can only declare
           this type of resource once in your node scope'
 
@@ -48,9 +48,8 @@ Example:
     defaultto 'tpm2'
 
     validate do |value|
-      raise(ArgumentError,"Error: $name must be 'tpm2'.") unless value == 'tpm2'
+      raise(ArgumentError, "Error: $name must be 'tpm2'.") unless value == 'tpm2'
     end
-
   end
 
   newparam(:owner_auth) do
@@ -64,7 +63,7 @@ Example:
   end
 
   newparam(:lockout_auth) do
-    desc "The lock out password of the TPM"
+    desc 'The lock out password of the TPM'
     validate do |value|
       unless value.is_a?(String)
         raise(Puppet::Error, "lockout_auth must be a String, not '#{value.class}'")
@@ -74,7 +73,7 @@ Example:
   end
 
   newparam(:endorsement_auth) do
-    desc "The endorse password of the TPM"
+    desc 'The endorse password of the TPM'
     validate do |value|
       unless value.is_a?(String)
         raise(Puppet::Error, "endorsement_auth must be a String, not '#{value.class}'")
@@ -83,14 +82,13 @@ Example:
     defaultto ''
   end
 
-
-  newparam(:in_hex, :boolean => true, :parent => Puppet::Parameter::Boolean) do
-    desc "Whether or not the passwords are in hex"
+  newparam(:in_hex, boolean: true, parent: Puppet::Parameter::Boolean) do
+    desc 'Whether or not the passwords are in hex'
     defaultto 'false'
   end
 
-  newparam(:local, :boolean => true, :parent => Puppet::Parameter::Boolean) do
-    desc "Whether to save the passwords on the local system"
+  newparam(:local, boolean: true, parent: Puppet::Parameter::Boolean) do
+    desc 'Whether to save the passwords on the local system'
     defaultto 'false'
   end
 
@@ -109,22 +107,20 @@ Example:
     newvalues(:clear, :set)
   end
 
-  #Global Validation
-   validate do
-
-     [[:owner,:owner_auth],[:lockout,:lockout_auth],[:endorsement, :endorsement_auth]].each { |x,y|
-       if self[x] ==  :set
-         raise(Puppet::Error, "Password parameter, #{y}, must be provided when #{x} = 'set'") if self[y].empty?
-       end
-     }
-   end
+  # Global Validation
+  validate do
+    [[:owner, :owner_auth], [:lockout, :lockout_auth], [:endorsement, :endorsement_auth]].each do |x, y|
+      if self[x] == :set
+        raise(Puppet::Error, "Password parameter, #{y}, must be provided when #{x} = 'set'") if self[y].empty?
+      end
+    end
+  end
 
   autorequire(:package) do
-    [ 'tpm2-tss','tpm2-tools' ]
+    [ 'tpm2-tss', 'tpm2-tools' ]
   end
   autorequire(:service) do
-    #To DO check if tcti = abrmd
+    # To DO check if tcti = abrmd
     [ 'tpm2-abrmd' ]
   end
-
 end
