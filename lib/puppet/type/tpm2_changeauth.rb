@@ -29,9 +29,9 @@ Example:
   }
 "
 
-  feature :take_ownership, "The ability to take ownership of a TPM"
+  feature :take_ownership, 'The ability to take ownership of a TPM'
 
-  newparam(:name, :namevar => true) do
+  newparam(:name, namevar: true) do
     desc 'The value of the context object to change the authorization on.  Currently only handles  owner, lockout, or  endorsement'
 
     isnamevar
@@ -39,9 +39,8 @@ Example:
     defaultto 'owner'
 
     validate do |value|
-      raise(ArgumentError,"Error: $name must be one of 'owner', 'lockout', 'endorsement'.") unless ['owner', 'lockout', 'endorsement'].include?(value)
+      raise(ArgumentError, "Error: $name must be one of 'owner', 'lockout', 'endorsement'.") unless ['owner', 'lockout', 'endorsement'].include?(value)
     end
-
   end
 
   newparam(:auth) do
@@ -51,7 +50,7 @@ Example:
         raise(Puppet::Error, "auth must be a String, not '#{value.class}'")
       end
       if value.empty?
-        raise(Puppet::Error, "auth must not be empty.")
+        raise(Puppet::Error, 'auth must not be empty.')
       end
     end
   end
@@ -63,11 +62,10 @@ Example:
   end
 
   autorequire(:package) do
-    [ 'tpm2-tss','tpm2-tools' ]
+    [ 'tpm2-tss', 'tpm2-tools' ]
   end
   autorequire(:service) do
-    #To DO check if tcti = abrmd
+    # To DO check if tcti = abrmd
     [ 'tpm2-abrmd' ]
   end
-
 end

@@ -2,7 +2,7 @@
 #
 # The fact will be nil if the tpm2-tools are either not available, or aren't
 # configured to communicate with the TPM
-Facter.add( :tpm2 ) do
+Facter.add(:tpm2) do
   confine { Facter::Core::Execution.which('tpm2_getcap') }
 
   setcode do
@@ -11,4 +11,3 @@ Facter.add( :tpm2 ) do
     Facter::TPM2::Util.new.build_structured_fact
   end
 end
-

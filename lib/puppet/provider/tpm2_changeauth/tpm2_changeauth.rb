@@ -11,12 +11,12 @@ Puppet::Type.type(:tpm2_changeauth).provide(:tpm2_changeauth) do
 
   has_feature :take_ownership
 
-  defaultfor :kernel => :Linux
+  defaultfor kernel: :Linux
 
-  commands :tpm2_changeauth => 'tpm2_changeauth'
+  commands tpm2_changeauth: 'tpm2_changeauth'
 
-  def initialize(value={})
-    super(value)
+  def initialize(value = {})
+    super
   end
 
   def set_auth(context, desired, auth)
@@ -41,16 +41,16 @@ Puppet::Type.type(:tpm2_changeauth).provide(:tpm2_changeauth) do
     when :set
       options << [ auth ]
     else
-      Puppet.warning("The setting for the state for tpm2_changeauth is not a known value.  Puppet will not attempt to change ownership.")
+      Puppet.warning('The setting for the state for tpm2_changeauth is not a known value.  Puppet will not attempt to change ownership.')
       return
     end
 
     begin
       tpm2_changeauth(options.flatten)
-      return
+      nil
     rescue Puppet::ExecutionFailure => e
       warn("tpm2_takeownership failed with error -> #{e.inspect}")
-      return e
+      e
     end
   end
 
@@ -78,7 +78,6 @@ Puppet::Type.type(:tpm2_changeauth).provide(:tpm2_changeauth) do
   end
 
   def state=(value)
-    set_auth( resource[:name], value, resource[:auth] )
+    set_auth(resource[:name], value, resource[:auth])
   end
-
 end
