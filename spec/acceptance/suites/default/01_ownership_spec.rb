@@ -10,55 +10,55 @@ test_name 'tpm2::ownership class'
 
 describe 'tpm2::ownership class' do
   let(:manifest) do
-    <<-MANIFEST
+    <<~MANIFEST
       include 'tpm2'
 
     MANIFEST
   end
 
   let(:hieradata_clearall) do
-    <<-HIERADATA
-tpm2::take_ownership: true
-tpm2::ownership::owner: clear
-tpm2::ownership::lockout: clear
-tpm2::ownership::endorsement: clear
-tpm2::ownership::owner_auth: 'Myownerpassword'
-tpm2::ownership::lockout_auth: 'Mylockpassword'
-tpm2::ownership::endorsement_auth: 'Myendorsepassword'
+    <<~HIERADATA
+      tpm2::take_ownership: true
+      tpm2::ownership::owner: clear
+      tpm2::ownership::lockout: clear
+      tpm2::ownership::endorsement: clear
+      tpm2::ownership::owner_auth: 'Myownerpassword'
+      tpm2::ownership::lockout_auth: 'Mylockpassword'
+      tpm2::ownership::endorsement_auth: 'Myendorsepassword'
     HIERADATA
   end
 
   let(:hieradata_setall) do
-    <<-HIERADATA
-tpm2::take_ownership: true
-tpm2::ownership::owner: set
-tpm2::ownership::lockout: set
-tpm2::ownership::endorsement: set
-tpm2::ownership::owner_auth: 'Myownerpassword'
-tpm2::ownership::lockout_auth: 'Mylockpassword'
-tpm2::ownership::endorsement_auth: 'Myendorsepassword'
+    <<~HIERADATA
+      tpm2::take_ownership: true
+      tpm2::ownership::owner: set
+      tpm2::ownership::lockout: set
+      tpm2::ownership::endorsement: set
+      tpm2::ownership::owner_auth: 'Myownerpassword'
+      tpm2::ownership::lockout_auth: 'Mylockpassword'
+      tpm2::ownership::endorsement_auth: 'Myendorsepassword'
     HIERADATA
   end
   let(:hieradata_setsome) do
-    <<-HIERADATA
-tpm2::take_ownership: true
-tpm2::ownership::owner: set
-tpm2::ownership::lockout: clear
-tpm2::ownership::endorsement: set
-tpm2::ownership::owner_auth: 'Myownerpassword'
-tpm2::ownership::lockout_auth: 'Mylockpassword'
-tpm2::ownership::endorsement_auth: 'Myendorsepassword'
+    <<~HIERADATA
+      tpm2::take_ownership: true
+      tpm2::ownership::owner: set
+      tpm2::ownership::lockout: clear
+      tpm2::ownership::endorsement: set
+      tpm2::ownership::owner_auth: 'Myownerpassword'
+      tpm2::ownership::lockout_auth: 'Mylockpassword'
+      tpm2::ownership::endorsement_auth: 'Myendorsepassword'
     HIERADATA
   end
   let(:hieradata_flip) do
-    <<-HIERADATA
-tpm2::take_ownership: true
-tpm2::ownership::owner: clear
-tpm2::ownership::lockout: set
-tpm2::ownership::endorsement: set
-tpm2::ownership::owner_auth: 'Myownerpassword'
-tpm2::ownership::lockout_auth: 'Mylockpassword'
-tpm2::ownership::endorsement_auth: 'Myendorsepassword'
+    <<~HIERADATA
+      tpm2::take_ownership: true
+      tpm2::ownership::owner: clear
+      tpm2::ownership::lockout: set
+      tpm2::ownership::endorsement: set
+      tpm2::ownership::owner_auth: 'Myownerpassword'
+      tpm2::ownership::lockout_auth: 'Mylockpassword'
+      tpm2::ownership::endorsement_auth: 'Myendorsepassword'
     HIERADATA
   end
 

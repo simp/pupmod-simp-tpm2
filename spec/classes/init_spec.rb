@@ -21,9 +21,9 @@ describe 'tpm2' do
   on_supported_os.each do |os, os_facts|
     context "tpm2 init on #{os}" do
       let(:facts) do
-        os_facts.merge({
-                         fqdn: 'myhost.com'
-                       })
+        os_facts.merge(
+          fqdn: 'myhost.com',
+        )
       end
 
       context 'with default params' do
@@ -34,9 +34,9 @@ describe 'tpm2' do
 
       context 'with detected TPM1 version TPM' do
         let(:facts) do
-          os_facts.merge({
-                           tpm_version: 'tpm1'
-                         })
+          os_facts.merge(
+            tpm_version: 'tpm1',
+          )
         end
 
         it 'works properly' do
@@ -47,20 +47,23 @@ describe 'tpm2' do
       context 'with service options' do
         let(:params) do
           {
-            tabrm_options: ['-option1', '-option2 X'],
-         tabrm_service: 'tpm2-abrmd-service'
+            tabrm_options: [
+              '-option1',
+              '-option2 X',
+            ],
+            tabrm_service: 'tpm2-abrmd-service',
           }
         end
         let(:hieradata) { 'take_ownership' }
 
         it {
-          is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with({
-                                                                                   unit: 'tpm2-abrmd-service.service',
-        notify: 'Service[tpm2-abrmd-service]'
-                                                                                 })
+          is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with(
+            unit: 'tpm2-abrmd-service.service',
+            notify: 'Service[tpm2-abrmd-service]',
+          )
         }
         it {
-          is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with_content(<<~EOM,
+          is_expected.to contain_systemd__dropin_file('tabrm_service.conf').with_content(<<~EOM)
             # This file managed by Puppet
             [Unit]
             ConditionPathExistsGlob=
@@ -68,15 +71,14 @@ describe 'tpm2' do
             [Service]
             ExecStart=
             ExecStart=/usr/sbin/tpm2-abrmd-service -option1 -option2 X
-            EOM
-                                                                                        )
+          EOM
         }
       end
 
       context 'with take_ownership true' do
         let(:params) do
           {
-            take_ownership: true
+            take_ownership: true,
           }
         end
 

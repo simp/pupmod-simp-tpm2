@@ -10,19 +10,19 @@ describe 'tpm2 class' do
   let(:tpm2_abrmd2_hieradata) do
     {
       # Required to use the IBM simulator
-      'tpm2::tabrm_options' => ['--tcti=/usr/lib64/libtss2-tcti-mssim.so.0']
+      'tpm2::tabrm_options' => ['--tcti=/usr/lib64/libtss2-tcti-mssim.so.0'],
     }
   end
 
   let(:tpm2_abrmd1_hieradata) do
     {
       # Required to use the IBM simulator
-      'tpm2::tabrm_options' => ['-t socket']
+      'tpm2::tabrm_options' => ['-t socket'],
     }
   end
 
   let(:manifest) do
-    <<-MANIFEST
+    <<~MANIFEST
       include 'tpm2'
     MANIFEST
   end

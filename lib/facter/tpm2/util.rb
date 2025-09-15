@@ -1,5 +1,6 @@
 require 'yaml'
 
+# Facter namespace
 module Facter; end
 
 # Namespace for TPM2-related classes
@@ -86,7 +87,7 @@ class Facter::TPM2::Util
                               fixed_props["#{@prefix}_PT_FIRMWARE_VERSION_2"],
                             ),
       'tools_version'    => @version,
-      'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props }
+      'tpm2_getcap'      => { 'properties-fixed' => fixed_props, 'properties-variable' => variable_props },
     }
   end
 
@@ -109,14 +110,14 @@ class Facter::TPM2::Util
   # Converts two unsigned Integers in a 4-part version string
   def tpm2_firmware_version(tpm_pt_firmware_version_1, tpm_pt_firmware_version_2)
     if tpm_pt_firmware_version_1.instance_of? Hash
-      _tpm_pt_firmware_version_1 = tpm_pt_firmware_version_1['raw']
-      _tpm_pt_firmware_version_2 = tpm_pt_firmware_version_2['raw']
+      firmware_version_1 = tpm_pt_firmware_version_1['raw']
+      firmware_version_2 = tpm_pt_firmware_version_2['raw']
     else
-      _tpm_pt_firmware_version_1 = tpm_pt_firmware_version_1
-      _tpm_pt_firmware_version_2 = tpm_pt_firmware_version_2
+      firmware_version_1 = tpm_pt_firmware_version_1
+      firmware_version_2 = tpm_pt_firmware_version_2
     end
-    s1 = ('%x' % _tpm_pt_firmware_version_1).rjust(8, '0')
-    s2 = ('%x' % _tpm_pt_firmware_version_2).rjust(8, '0')
+    s1 = ('%x' % firmware_version_1).rjust(8, '0')
+    s2 = ('%x' % firmware_version_2).rjust(8, '0')
     # rubocop:enable Style/FormatStringToken
     (s1.scan(%r{.{4}}) + s2.scan(%r{.{4}})).map { |x| x.hex }.join('.')
   end

@@ -18,47 +18,47 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2_takeownership)' do
   let(:expected_hash1) do
     {
       :owner => :clear,
-   :endorsement      => :clear,
-   :lockout          => :clear,
-   'reserved1'       => :clear,
-   'disableClear'    => :clear,
-   'inLockout'       => :clear,
-   'tpmGeneratedEPS' => :set,
-   'reserved2'       => :clear,
+      :endorsement => :clear,
+      :lockout => :clear,
+      'reserved1' => :clear,
+      'disableClear' => :clear,
+      'inLockout' => :clear,
+      'tpmGeneratedEPS' => :set,
+      'reserved2' => :clear,
     }
   end
 
   let(:provider) { resource.provider }
   let(:resource) do
-    Puppet::Type.type(:tpm2_ownership).new({
-                                             name: 'tpm2',
-    owner: 'clear',
-    lockout: 'clear',
-    endorsement: 'clear',
-    provider: 'tpm2_takeownership'
-                                           })
+    Puppet::Type.type(:tpm2_ownership).new(
+      name: 'tpm2',
+      owner: 'clear',
+      lockout: 'clear',
+      endorsement: 'clear',
+      provider: 'tpm2_takeownership',
+    )
   end
 
   describe 'get_password_options' do
     context 'first set' do
       let(:resource) do
-        Puppet::Type.type(:tpm2_ownership).new({
-                                                 name: 'tpm2',
-        owner_auth: 'ownerpassword',
-        lockout_auth: 'lockpassword',
-        endorsement_auth: 'endorsepassword',
-        owner: 'set',
-        lockout: 'set',
-        endorsement: 'clear',
-        provider: 'tpm2_takeownership'
-                                               })
+        Puppet::Type.type(:tpm2_ownership).new(
+          name: 'tpm2',
+          owner_auth: 'ownerpassword',
+          lockout_auth: 'lockpassword',
+          endorsement_auth: 'endorsepassword',
+          owner: 'set',
+          lockout: 'set',
+          endorsement: 'clear',
+          provider: 'tpm2_takeownership',
+        )
       end
 
       let(:current1) do
         {
           owner: :clear,
-       endorsement: :clear,
-       lockout: :clear,
+          endorsement: :clear,
+          lockout: :clear,
         }
       end
 
@@ -74,24 +74,24 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2_takeownership)' do
       # If current = clear and desired = set then you need to set it, hence ['-e','endorsepassword']
       # if current = set and desired = clear then you need to clear it, hence ['-L','lockpassword']
       let(:resource) do
-        Puppet::Type.type(:tpm2_ownership).new({
-                                                 name: 'tpm2',
-        owner_auth: 'ownerpassword',
-        lockout_auth: 'lockpassword',
-        endorsement_auth: 'endorsepassword',
-        owner: 'set',
-        lockout: 'clear',
-        endorsement: 'set',
-        in_hex: 'true',
-        provider: 'tpm2_takeownership'
-                                               })
+        Puppet::Type.type(:tpm2_ownership).new(
+          name: 'tpm2',
+          owner_auth: 'ownerpassword',
+          lockout_auth: 'lockpassword',
+          endorsement_auth: 'endorsepassword',
+          owner: 'set',
+          lockout: 'clear',
+          endorsement: 'set',
+          in_hex: 'true',
+          provider: 'tpm2_takeownership',
+        )
       end
 
       let(:current2) do
         {
           owner: :set,
-       endorsement: :clear,
-       lockout: :set,
+          endorsement: :clear,
+          lockout: :set,
         }
       end
 
@@ -104,23 +104,23 @@ describe 'Puppet::Type.type(:tpm2_ownership).provider(:tpm2_takeownership)' do
     end
     context 'clear when lockout password is not set' do
       let(:resource) do
-        Puppet::Type.type(:tpm2_ownership).new({
-                                                 name: 'tpm2',
-        owner_auth: 'ownerpassword',
-        lockout_auth: 'lockpassword',
-        endorsement_auth: 'endorsepassword',
-        owner: 'clear',
-        lockout: 'clear',
-        endorsement: 'clear',
-        provider: 'tpm2_takeownership'
-                                               })
+        Puppet::Type.type(:tpm2_ownership).new(
+          name: 'tpm2',
+          owner_auth: 'ownerpassword',
+          lockout_auth: 'lockpassword',
+          endorsement_auth: 'endorsepassword',
+          owner: 'clear',
+          lockout: 'clear',
+          endorsement: 'clear',
+          provider: 'tpm2_takeownership',
+        )
       end
 
       let(:current) do
         {
           owner: :set,
-       endorsement: :set,
-       lockout: :clear,
+          endorsement: :set,
+          lockout: :clear,
         }
       end
 

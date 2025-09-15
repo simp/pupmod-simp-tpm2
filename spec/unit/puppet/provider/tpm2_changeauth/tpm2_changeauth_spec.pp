@@ -23,12 +23,12 @@ describe 'Puppet::Type.type(:tpm2_changeauth).provider(:tpm2_changeauth)' do
 
   context 'with name set to owner' do
     let (:resource) {
-      Puppet::Type.type(:tpm2_changeauth).new({
-      :name         => 'owner',
-      :state        => 'set',
-      :auth         => 'password',
-      :provider     => 'tpm2_changeauth'
-      })}
+      Puppet::Type.type(:tpm2_changeauth).new(
+        :name     => 'owner',
+        :state    => 'set',
+        :auth     => 'password',
+        :provider => 'tpm2_changeauth',
+      )}
 
 
     it 'should run tpm2_changeauth with the correct arguments' do

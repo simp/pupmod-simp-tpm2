@@ -117,7 +117,7 @@ Puppet::Type.type(:tpm2_ownership).provide(:tpm2_takeownership) do
     [ :owner, :lockout, :endorsement ].each do |x|
       if @property_current[x] == :unknown
         Puppet.warning('The status of the tpm authorization values are unknown.  Puppet will not attempt to change ownership.')
-        return
+        return # rubocop:disable Lint/NonLocalExitFromIterator
       end
       # The setter will only set a value for @property_flush if it is changing.
       @property_flush[x] = resource[x]
