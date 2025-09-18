@@ -164,7 +164,7 @@ describe 'tpm2::ownership' do
               'lockout'          => 'set',
               'endorsement'      => 'ignore',
               'lockout_auth'     => 'MyMysteryPassword',
-              'endorment_auth'   => 'MyMysteryPassword',
+              'endorsement_auth' => 'MyMysteryPassword',
               'owner_auth'       => 'MyMysteryPassword',
             )
           }
