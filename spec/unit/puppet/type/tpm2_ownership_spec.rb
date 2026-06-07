@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-tpm2_ownership_type = Puppet::Type.type(:tpm2_ownership)
-
 describe 'tpm2_ownership_type' do
+  let(:tpm2_ownership_type) { Puppet::Type.type(:tpm2_ownership) }
+
   context 'when setting parameters' do
     it 'accepts a name parameter and set defaults' do
       resource = tpm2_ownership_type.new name: 'tpm2', owner: 'clear'

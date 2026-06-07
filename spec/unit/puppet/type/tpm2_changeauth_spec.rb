@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-tpm2_changeauth_type = Puppet::Type.type(:tpm2_changeauth)
-
 describe 'tpm2_changeauth_type' do
+  let(:tpm2_changeauth_type) { Puppet::Type.type(:tpm2_changeauth) }
+
   context 'when setting parameters' do
     it 'accepts a name parameter, owner and set defaults' do
       resource = tpm2_changeauth_type.new name: 'owner', state: 'clear', auth: 'password'
