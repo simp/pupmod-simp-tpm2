@@ -7,7 +7,7 @@ module Facter; end
 #
 # @see Facter::TPM2::Util Facter::TPM2::Util - Utilities for detecting and
 #   reporting TPM 2.0 details
-module Facter::TPM2; end
+module Facter::TPM2; end # rubocop:disable Style/OneClassPerFile
 
 # Utilities for detecting and reporting TPM 2.0 information
 #
@@ -20,7 +20,7 @@ module Facter::TPM2; end
 # @note TPM devices are assumed to follow the TCG PC Client PTP Specification
 #   (https://trustedcomputinggroup.org/pc-client-platform-tpm-profile-ptp-specification/)
 #
-class Facter::TPM2::Util
+class Facter::TPM2::Util # rubocop:disable Style/OneClassPerFile
   def initialize
     cmd = Facter::Core::Execution.which('tpm2_getcap')
 
