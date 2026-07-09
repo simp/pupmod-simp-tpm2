@@ -22,8 +22,8 @@ class tpm2::service {
     }
   }
 
-  service{ $tpm2::tabrm_service:
+  service { $tpm2::tabrm_service:
     ensure => running,
-    enable =>  true
+    enable => true
   }
 }
