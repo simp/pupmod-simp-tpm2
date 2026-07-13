@@ -59,19 +59,17 @@
 #
 # @author SIMP Team https://simp-project.com
 #
-class tpm2::ownership(
+class tpm2::ownership (
   Enum['set','clear','ignore']   $owner              = 'clear',
   Enum['set','clear','ignore']   $endorsement        = 'clear',
   Enum['set','clear','ignore']   $lockout            = 'clear',
-  String[14]                     $owner_auth         = simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", {'length'=> 24}),
-  String[14]                     $lockout_auth       = simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", {'length'=> 24}),
-  String[14]                     $endorsement_auth   = simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", {'length'=> 24}),
+  String[14]                     $owner_auth         = simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", { 'length'=> 24 }),
+  String[14]                     $lockout_auth       = simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", { 'length'=> 24 }),
+  String[14]                     $endorsement_auth   = simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", { 'length'=> 24 }),
   Boolean                        $in_hex             = false
-){
-
+) {
   if $facts['tpm2'] and $facts['tpm2']['tools_version'] {
     if  versioncmp($facts['tpm2']['tools_version'], '4.0.0') < 0 {
-
       if $owner == 'ignore' or $endorsement == 'ignore' or $lockout == 'ignore' {
         fail("'ignore' is not a valid setting for param owner, endorsement or lockout when tpm2-tools verions < 4.0.0 is installed. Current version is ${facts['tpm2']['tools_version']}")
       } else {
@@ -86,17 +84,15 @@ class tpm2::ownership(
         }
       }
     } else {
-    # tpm2-tools version >= 4.0.0
-        class { 'tpm2::ownership::changeauth':
-          owner            => $owner,
-          lockout          => $lockout,
-          endorsement      => $endorsement,
-          owner_auth       => $owner_auth,
-          endorsement_auth => $endorsement_auth,
-          lockout_auth     => $lockout_auth,
-        }
+      # tpm2-tools version >= 4.0.0
+      class { 'tpm2::ownership::changeauth':
+        owner            => $owner,
+        lockout          => $lockout,
+        endorsement      => $endorsement,
+        owner_auth       => $owner_auth,
+        endorsement_auth => $endorsement_auth,
+        lockout_auth     => $lockout_auth,
+      }
     }
-
   }
-
 }

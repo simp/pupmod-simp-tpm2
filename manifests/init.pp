@@ -23,12 +23,12 @@
 # @author SIMP Team https://simp-project.com
 #
 class tpm2 (
-  String[1]                                  $package_ensure    = simplib::lookup('simp_options::package_ensure', {'default_value' => 'installed'}),
+  String[1]                                  $package_ensure    = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' }),
   Hash[String[1], Hash[String[1],String[1]]] $packages          = simplib::lookup('tpm2::packages'),
   String[1]                                  $tabrm_service     = 'tpm2-abrmd',
   Optional[Array[String[1]]]                 $tabrm_options     = undef,
   Boolean                                    $take_ownership    = false,
-){
+) {
   simplib::assert_metadata( $module_name )
 
   # There is no reason to install TPM2 resources on a host
@@ -39,7 +39,7 @@ class tpm2 (
   } else {
     include 'tpm2::install'
     include 'tpm2::service'
-    Class[ 'tpm2::install' ] ~> Class[ 'tpm2::service' ]
+    Class['tpm2::install'] ~> Class['tpm2::service']
 
     if $take_ownership {
       include 'tpm2::ownership'
