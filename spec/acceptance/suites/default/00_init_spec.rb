@@ -27,6 +27,24 @@ describe 'tpm2 class' do
     MANIFEST
   end
 
+  # Exercise noop from a clean (uninstalled) state: on a fresh node the Sicura
+  # console previews the module with `puppet apply --noop`, which must not error
+  # even though nothing tpm2 manages exists yet. Real idempotence is covered
+  # by the applies below. A post-convergence noop check is deliberately omitted:
+  # `puppet apply --noop --detailed-exitcodes` always exits 0, so it could never
+  # fail and would test nothing.
+  context 'in noop mode from a clean state' do
+    before(:context) do
+      on(hosts, 'puppet resource package tpm2-tools ensure=absent')
+      on(hosts, 'puppet resource package tpm2-tss ensure=absent')
+      on(hosts, 'puppet resource package tpm2-abrmd ensure=absent')
+    end
+
+    it 'applies without errors in noop mode' do
+      apply_manifest_on(hosts, manifest, catch_failures: true, noop: true)
+    end
+  end
+
   hosts.each do |host|
     context "on #{host} with tpm" do
       it 'installs tpm2-abrmd' do
