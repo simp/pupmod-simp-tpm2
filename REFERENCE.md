@@ -44,7 +44,7 @@ Data type: `String[1]`
 
 The default ensure parameter for packages.
 
-Default value: `simplib::lookup('simp_options::package_ensure', {'default_value' => 'installed'})`
+Default value: `simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })`
 
 ##### <a name="-tpm2--packages"></a>`packages`
 
@@ -170,7 +170,7 @@ Data type: `String[14]`
 
 The password word for owner authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--lockout_auth"></a>`lockout_auth`
 
@@ -178,7 +178,7 @@ Data type: `String[14]`
 
 The password word for lockout authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--endorsement_auth"></a>`endorsement_auth`
 
@@ -186,7 +186,7 @@ Data type: `String[14]`
 
 The password word for endorsement authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--in_hex"></a>`in_hex`
 
@@ -285,7 +285,7 @@ Data type: `String[14]`
 
 The password word for owner authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--changeauth--lockout_auth"></a>`lockout_auth`
 
@@ -293,7 +293,7 @@ Data type: `String[14]`
 
 The password word for lockout authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--changeauth--endorsement_auth"></a>`endorsement_auth`
 
@@ -301,7 +301,7 @@ Data type: `String[14]`
 
 The password word for endorsement authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", { 'length'=> 24 })`
 
 ### <a name="tpm2--ownership--takeownership"></a>`tpm2::ownership::takeownership`
 
@@ -385,7 +385,7 @@ Data type: `String[14]`
 
 The password word for owner authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_owner_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--takeownership--lockout_auth"></a>`lockout_auth`
 
@@ -393,7 +393,7 @@ Data type: `String[14]`
 
 The password word for lockout authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_lock_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--takeownership--endorsement_auth"></a>`endorsement_auth`
 
@@ -401,7 +401,7 @@ Data type: `String[14]`
 
 The password word for endorsement authentication.
 
-Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", {'length'=> 24})`
+Default value: `simplib::passgen("${facts['networking']['fqdn']}_tpm_endorse_auth", { 'length'=> 24 })`
 
 ##### <a name="-tpm2--ownership--takeownership--in_hex"></a>`in_hex`
 
