@@ -110,7 +110,7 @@ following settings (it expects a minumum password length of 14 charaters):
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 
@@ -213,7 +213,7 @@ multiple machines with different tpm2-tools packages.
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 
@@ -324,7 +324,7 @@ following settings (it expects a minumum password length of 14 charaters):
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 
@@ -585,4 +585,3 @@ usually discover the appropriate provider for your platform.
 Valid ownership options for TPM2
 
 Alias of `Enum['set', 'clear']`
-
